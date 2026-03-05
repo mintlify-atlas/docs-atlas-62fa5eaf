@@ -1,0 +1,163 @@
+{
+  "projectType": "saas",
+  "projectName": "Arte y Web Creaciones",
+  "projectDescription": "Professional web design agency offering website creation, online stores, hosting, and digital marketing services across Spain",
+  "theme": "almond",
+  "primaryColor": "#1474ec",
+  "lightColor": "#7fb4f4",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "getting-help"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/astro-framework",
+              "concepts/content-collections",
+              "concepts/component-architecture"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Services",
+        "groups": [
+          {
+            "group": "Web Design",
+            "pages": [
+              "services/web-design/overview",
+              "services/web-design/onepage",
+              "services/web-design/professional",
+              "services/web-design/premium"
+            ]
+          },
+          {
+            "group": "E-commerce",
+            "pages": [
+              "services/ecommerce/overview",
+              "services/ecommerce/starter",
+              "services/ecommerce/pro",
+              "services/ecommerce/premium"
+            ]
+          },
+          {
+            "group": "Hosting & Maintenance",
+            "pages": [
+              "services/hosting/wordpress-hosting",
+              "services/hosting/domain-management",
+              "services/maintenance/annual-maintenance",
+              "services/maintenance/backups"
+            ]
+          },
+          {
+            "group": "Marketing",
+            "pages": [
+              "services/marketing/seo",
+              "services/marketing/social-media",
+              "services/marketing/email-campaigns",
+              "services/marketing/paid-advertising"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/hero",
+              "components/forms",
+              "components/navigation",
+              "components/testimonials"
+            ]
+          },
+          {
+            "group": "Content Management",
+            "pages": [
+              "content/blog-posts",
+              "content/promotions",
+              "content/data-files"
+            ]
+          },
+          {
+            "group": "Sections",
+            "pages": [
+              "sections/layout-structure",
+              "sections/pricing-sections",
+              "sections/process-delivery"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Configuration",
+        "groups": [
+          {
+            "group": "Setup",
+            "pages": [
+              "configuration/astro-config",
+              "configuration/content-collections",
+              "configuration/deployment"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "configuration/tailwind",
+              "configuration/mdx",
+              "configuration/icons"
+            ]
+          },
+          {
+            "group": "SEO & Performance",
+            "pages": [
+              "configuration/seo-setup",
+              "configuration/sitemap",
+              "configuration/redirects"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Professional web design services with three pricing tiers (OnePage, Pro, Premium)",
+    "E-commerce store creation with WooCommerce integration",
+    "Optimized WordPress hosting with Cloudflare, Hetzner, and ServerAvatar",
+    "Annual web maintenance including backups and technical support",
+    "Digital marketing services: SEO, social media, email campaigns, and paid advertising",
+    "Multi-language support (up to 5 languages in premium plans)",
+    "Blog and content management system with MDX support",
+    "Location-specific landing pages for local SEO (Alicante, Benidorm, Altea, Calpe, etc.)",
+    "Integration with Google Reviews and testimonials",
+    "Contact forms with Mautic integration for lead management",
+    "Promotional campaigns and special offers system",
+    "SSL certificates and GDPR compliance features"
+  ],
+  "publicApiSurface": [
+    "Hero component - Main landing page hero section with pricing",
+    "NuestrasWebs component - Web design service showcase",
+    "WebTienda component - E-commerce service showcase",
+    "ProcesoEntrega section - Service delivery process timeline",
+    "GoogleReviews component - Customer reviews integration",
+    "FormMautic component - Contact and quote request forms",
+    "BlogSidebar component - Blog navigation and categories",
+    "AccordionItemSEO component - FAQ and SEO content",
+    "CuentaAtras component - Countdown timer for promotions",
+    "TrustBadges component - Trust and credibility indicators",
+    "Content Collections API - Blog posts, promotions (promoSingle, promoPro, promoTienda)",
+    "Data Files - servicios.json, precios.json, testimonios.json, menu.json"
+  ]
+}
