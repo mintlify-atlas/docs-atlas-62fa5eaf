@@ -1,0 +1,721 @@
+---
+title: 'Testimonials & Reviews'
+description: 'GoogleReviews component for displaying customer testimonials and social proof'
+icon: 'comments'
+---
+
+## Overview
+
+The GoogleReviews component displays customer testimonials and Google reviews in an engaging carousel format, providing powerful social proof for conversion optimization.
+
+## GoogleReviews
+
+An advanced carousel component that combines Google reviews and custom testimonials with auto-play, manual navigation, and responsive design.
+
+### Props
+
+<ParamField path="city" type="string" default="Benidorm y España">
+  The city or region name to display in the section heading. Used for localization and geographic targeting.
+</ParamField>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Unified Reviews" icon="star">
+    Combines Google reviews and custom testimonials into a single carousel.
+  </Card>
+  <Card title="Auto-Play Carousel" icon="play">
+    Automatic rotation every 8 seconds with pause on hover.
+  </Card>
+  <Card title="Manual Navigation" icon="arrows-left-right">
+    Previous/Next buttons for manual control of the carousel.
+  </Card>
+  <Card title="Responsive Layout" icon="mobile">
+    Displays 3 cards on desktop, 2 on tablet, 1 on mobile.
+  </Card>
+  <Card title="Read More Toggle" icon="expand">
+    Expandable review text with "Leer más" / "Ocultar" functionality.
+  </Card>
+  <Card title="Trust Indicators" icon="shield-check">
+    Verified badge and Trustindex certification for credibility.
+  </Card>
+</CardGroup>
+
+### Usage
+
+<CodeGroup>
+```astro Basic Usage
+---
+import GoogleReviews from '@/components/GoogleReviews.astro';
+---
+
+<GoogleReviews />
+```
+
+```astro With City Name
+---
+import GoogleReviews from '@/components/GoogleReviews.astro';
+---
+
+<GoogleReviews city="Alicante" />
+```
+
+```astro In Landing Page
+---
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+import GoogleReviews from '@/components/GoogleReviews.astro';
+import FormMautic from '@/components/FormMautic.astro';
+---
+
+<HeroOfertas idPromo="web-onepage" />
+
+<!-- Features section -->
+
+<GoogleReviews city="Benidorm" />
+
+<!-- Form section -->
+<FormMautic formId={5} />
+```
+
+```astro City-Specific Pages
+---
+import GoogleReviews from '@/components/GoogleReviews.astro';
+
+const { city } = Astro.params;
+const cityName = city === 'alicante' ? 'Alicante' : 
+                 city === 'benidorm' ? 'Benidorm' :
+                 'España';
+---
+
+<GoogleReviews city={cityName} />
+```
+</CodeGroup>
+
+## Data Sources
+
+The component merges data from two JSON files:
+
+### Google Reviews Data
+
+**File**: `src/data/google-reviews.json`
+
+```json
+[
+  {
+    "author": "Juan Pérez",
+    "rating": 5,
+    "text": "Excelente servicio, muy profesionales.",
+    "fullText": "Excelente servicio, muy profesionales. Me ayudaron con el diseño de mi página web y quedó perfecta. Totalmente recomendados.",
+    "avatar": "https://lh3.googleusercontent.com/a/...",
+    "date": "hace 2 semanas",
+    "source": "google"
+  }
+]
+```
+
+### Custom Testimonials Data
+
+**File**: `src/data/testimonios.json`
+
+```json
+[
+  {
+    "title": "María González",
+    "description": "Increíble trabajo en mi tienda online. Las ventas aumentaron un 150% después del rediseño.",
+    "estrellas": 5,
+    "image": "/img/testimonials/maria.jpg"
+  }
+]
+```
+
+### Data Mapping
+
+The component transforms testimonials to match the reviews format:
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:5-14 -->
+const mappedTestimonios = testimonios.map((t) => ({
+  author: t.title,
+  rating: t.estrellas,
+  fullText: t.description,
+  text: t.description,
+  avatar: t.image,
+  date: "Cliente Satisfecho",
+  source: "web"
+}));
+
+const allReviews = [...mappedTestimonios, ...reviews];
+```
+
+## Component Structure
+
+### Layout Overview
+
+```
+┌─────────────────────────────────────────────────┐
+│               SECTION TITLE                     │
+│         Casos de Éxito: Páginas Web...          │
+├──────────────┬──────────────────────────────────┤
+│              │                                  │
+│  EXCELENTE   │  [Review Cards Carousel]         │
+│   ★★★★★      │  ← Card 1 | Card 2 | Card 3 →  │
+│ 254 reseñas  │                                  │
+│   Google     │                                  │
+│              │  Verified by: Trustindex         │
+└──────────────┴──────────────────────────────────┘
+```
+
+### Left Panel - Rating Summary
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:39-60 -->
+<div class="reviews-left-panel">
+  <div class="text-center w-full">
+    <div class="rating-label">EXCELENTE</div>
+    <div class="rating-stars">★★★★★</div>
+    <div class="rating-count">
+      A base de <strong>254 reseñas</strong>
+    </div>
+    <div class="rating-logo">
+      <!-- Styled Google logo -->
+    </div>
+  </div>
+</div>
+```
+
+### Right Panel - Carousel
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:64-162 -->
+<div class="reviews-right-panel">
+  <div class="carousel-wrapper">
+    <button class="carousel-btn prev" id="prevBtn">‹</button>
+    
+    <div class="w-full overflow-hidden" id="carouselContainer">
+      <div class="flex" id="carouselTrack">
+        {allReviews.map((review) => (
+          <div class="review-card">
+            <!-- Review card content -->
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    <button class="carousel-btn next" id="nextBtn">›</button>
+  </div>
+</div>
+```
+
+### Review Card Structure
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:82-148 -->
+<div class="review-card">
+  <div class="review-card-inner">
+    <!-- Header: Avatar, Name, Date -->
+    <div class="flex items-center gap-3">
+      <img src={review.avatar} alt={review.author} class="w-10 h-10 rounded-full" />
+      <div>
+        <span class="font-bold">{review.author}</span>
+        <p class="text-xs text-gray-500">{review.date}</p>
+      </div>
+      <div class="text-[#4285F4]">G</div>
+    </div>
+    
+    <!-- Stars and Verified Badge -->
+    <div class="flex items-center gap-1.5">
+      <div class="flex">★★★★★</div>
+      <svg class="w-4 h-4 text-blue-500"><!-- Checkmark --></svg>
+    </div>
+    
+    <!-- Review Text -->
+    <p class="review-text">{review.fullText}</p>
+    <button class="review-toggle-btn">Leer más</button>
+  </div>
+</div>
+```
+
+## Carousel Functionality
+
+### Responsive Cards Display
+
+<Tabs>
+  <Tab title="Desktop (≥1024px)">
+    Shows 3 cards at a time
+    ```javascript
+    window.innerWidth >= 1024 ? 3 : ...
+    ```
+  </Tab>
+  <Tab title="Tablet (≥768px)">
+    Shows 2 cards at a time
+    ```javascript
+    window.innerWidth >= 768 ? 2 : ...
+    ```
+  </Tab>
+  <Tab title="Mobile (<768px)">
+    Shows 1 card at a time
+    ```javascript
+    window.innerWidth < 768 ? 1 : ...
+    ```
+  </Tab>
+</Tabs>
+
+### Auto-Play System
+
+```javascript
+// Location: src/components/GoogleReviews.astro:232-239
+function startAutoPlay() {
+  stopAutoPlay();
+  autoPlayInterval = setInterval(goToNext, 8000); // 8 seconds
+}
+
+function stopAutoPlay() {
+  clearInterval(autoPlayInterval);
+}
+```
+
+### Navigation Controls
+
+<CodeGroup>
+```javascript Next Button
+// Location: src/components/GoogleReviews.astro:211-219
+function goToNext() {
+  const maxIndex = getMaxIndex();
+  if (currentIndex < maxIndex) {
+    currentIndex++;
+  } else {
+    currentIndex = 0; // Loop back to start
+  }
+  updateCarousel();
+}
+```
+
+```javascript Previous Button
+// Location: src/components/GoogleReviews.astro:221-229
+function goToPrev() {
+  const maxIndex = getMaxIndex();
+  if (currentIndex > 0) {
+    currentIndex--;
+  } else {
+    currentIndex = maxIndex; // Jump to end
+  }
+  updateCarousel();
+}
+```
+
+```javascript Update Display
+// Location: src/components/GoogleReviews.astro:195-202
+function updateCarousel() {
+  const cardsPerView = getCardsPerView();
+  const cardWidthPercentage = 100 / cardsPerView;
+  
+  track.style.transform = 
+    `translateX(-${currentIndex * cardWidthPercentage}%)`;
+}
+```
+</CodeGroup>
+
+### Pause on Hover
+
+```javascript
+// Location: src/components/GoogleReviews.astro:270-274
+const carouselWrapper = document.querySelector('.carousel-wrapper');
+if (carouselWrapper) {
+  carouselWrapper.addEventListener('mouseenter', stopAutoPlay);
+  carouselWrapper.addEventListener('mouseleave', startAutoPlay);
+}
+```
+
+## Expand/Collapse Functionality
+
+Review text is initially truncated to 3 lines with a "Leer más" button:
+
+### CSS Truncation
+
+```css
+/* Location: src/components/GoogleReviews.astro:392-408 */
+.review-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 4.5rem;
+  line-height: 1.5;
+}
+
+.review-text.expanded {
+  -webkit-line-clamp: unset;
+  max-height: 1000px;
+  overflow: visible;
+}
+```
+
+### Toggle Script
+
+```javascript
+// Location: src/components/GoogleReviews.astro:278-302
+carouselContainer.addEventListener('click', (e) => {
+  const btn = e.target.closest('.review-toggle-btn');
+  if (!btn) return;
+  
+  const card = btn.closest('.review-card-inner');
+  const reviewText = card?.querySelector('.review-text');
+  
+  const isExpanded = reviewText.classList.contains('expanded');
+  if (isExpanded) {
+    reviewText.classList.remove('expanded');
+    btn.textContent = 'Leer más';
+  } else {
+    reviewText.classList.add('expanded');
+    btn.textContent = 'Ocultar';
+  }
+});
+```
+
+## Styling System
+
+### Container Widths
+
+```css
+/* Location: src/components/GoogleReviews.astro:306-311 */
+.title-wrapper,
+.reviews-main-wrapper,
+.reviews-badge-wrapper {
+  width: 100%;
+  max-width: var(--container-width-desktop);
+  margin: 0 auto;
+}
+```
+
+### Panel Layout
+
+```css
+/* Location: src/components/GoogleReviews.astro:313-331 */
+.reviews-main-wrapper {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.reviews-left-panel {
+  flex-shrink: 0;
+  width: 150px;
+}
+
+.reviews-right-panel {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+```
+
+### Card Styling
+
+```css
+/* Location: src/components/GoogleReviews.astro:380-390 */
+.review-card-inner {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background: #f4f4f4;
+  border: none;
+}
+
+.review-card-inner:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+```
+
+### Google Logo Styling
+
+Multi-color Google logo created with CSS:
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:48-57 -->
+<span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+  <span style="color: #4285F4;">G</span>
+  <span style="color: #EA4335;">o</span>
+  <span style="color: #FBBC04;">o</span>
+  <span style="color: #4285F4;">g</span>
+  <span style="color: #34A853;">l</span>
+  <span style="color: #EA4335;">e</span>
+</span>
+```
+
+## Responsive Design
+
+### Mobile Breakpoint (≤1024px)
+
+```css
+/* Location: src/components/GoogleReviews.astro:410-426 */
+@media (max-width: 1024px) {
+  .reviews-main-wrapper {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .reviews-left-panel {
+    width: 100%;
+    max-width: 250px;
+    margin: 0 auto;
+  }
+}
+```
+
+### Tablet Breakpoint (≤768px)
+
+```css
+/* Location: src/components/GoogleReviews.astro:428-443 */
+@media (max-width: 768px) {
+  .rating-label {
+    font-size: 22px;
+  }
+  
+  .rating-stars {
+    font-size: 24px;
+  }
+  
+  .reviews-left-panel {
+    width: 160px;
+  }
+}
+```
+
+## Trust Elements
+
+### Star Rating Display
+
+```astro
+<div class="rating-stars">★★★★★</div>
+```
+
+### Review Count
+
+```astro
+<div class="rating-count">
+  A base de <strong>254 reseñas</strong>
+</div>
+```
+
+<Note>
+  The review count is hardcoded. You can make it dynamic by using `allReviews.length`.
+</Note>
+
+### Verification Badge
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:125-135 -->
+<svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+  <path
+    fill-rule="evenodd"
+    d="M6.267 3.455a3.066 3.066 0 001.745-.723..."
+    clip-rule="evenodd"
+  />
+</svg>
+```
+
+### Trustindex Badge
+
+```astro
+<!-- Location: src/components/GoogleReviews.astro:167-178 -->
+<div class="bg-green-700 text-white px-4 py-2 flex items-center gap-2">
+  <span>Verificado por: Trustindex</span>
+  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+    <!-- Checkmark icon -->
+  </svg>
+</div>
+```
+
+## Customization Examples
+
+### Change Auto-Play Speed
+
+```javascript
+function startAutoPlay() {
+  stopAutoPlay();
+  autoPlayInterval = setInterval(goToNext, 5000); // 5 seconds instead of 8
+}
+```
+
+### Dynamic Review Count
+
+```astro
+<div class="rating-count">
+  A base de <strong>{allReviews.length} reseñas</strong>
+</div>
+```
+
+### Custom Card Layout
+
+For 4 cards on large screens:
+
+```javascript
+function getCardsPerView() {
+  return window.innerWidth >= 1400 ? 4 : // Extra large
+         window.innerWidth >= 1024 ? 3 : // Desktop
+         window.innerWidth >= 768 ? 2 :  // Tablet
+         1;                               // Mobile
+}
+```
+
+### Different Color Scheme
+
+```css
+:root {
+  --review-bg: #ffffff;
+  --review-hover-bg: #f8f9fa;
+  --star-color: #fbbf24;
+  --verified-color: #4285F4;
+}
+
+.review-card-inner {
+  background: var(--review-bg);
+}
+
+.review-card-inner:hover {
+  background: var(--review-hover-bg);
+}
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Fresh Content" icon="clock">
+    Update reviews regularly to maintain authenticity and show recent customer experiences.
+  </Card>
+  <Card title="Mix Sources" icon="shuffle">
+    Combine Google reviews with custom testimonials for variety and comprehensive social proof.
+  </Card>
+  <Card title="High-Quality Images" icon="image">
+    Use clear, professional photos for avatar images to build trust.
+  </Card>
+  <Card title="Authentic Reviews" icon="check-circle">
+    Use real customer feedback - authenticity is more valuable than perfect reviews.
+  </Card>
+  <Card title="Moderate Length" icon="text">
+    Keep reviews between 50-150 words for optimal readability.
+  </Card>
+  <Card title="Response Rate" icon="comment-dots">
+    Consider showing business responses to reviews to demonstrate engagement.
+  </Card>
+</CardGroup>
+
+## Performance Optimization
+
+<AccordionGroup>
+  <Accordion title="Lazy Load Images">
+    Avatar images use lazy loading:
+    
+    ```astro
+    <img
+      src={review.avatar}
+      alt={review.author}
+      loading="lazy"
+      class="w-10 h-10 rounded-full"
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Efficient Animations">
+    Uses CSS transforms for smooth carousel transitions:
+    
+    ```css
+    .flex {
+      transition: transform 0.5s ease-in-out;
+    }
+    
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    ```
+  </Accordion>
+  
+  <Accordion title="Event Delegation">
+    Uses event delegation for "Read more" buttons to minimize event listeners:
+    
+    ```javascript
+    carouselContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.review-toggle-btn');
+      // Handle click
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Accessibility
+
+<AccordionGroup>
+  <Accordion title="ARIA Labels">
+    ```astro
+    <button
+      class="carousel-btn prev"
+      aria-label="Reseña anterior"
+    >‹</button>
+    
+    <button
+      class="carousel-btn next"
+      aria-label="Siguiente reseña"
+    >›</button>
+    ```
+  </Accordion>
+  
+  <Accordion title="Alt Text">
+    All images include descriptive alt text:
+    
+    ```astro
+    <img
+      src={review.avatar}
+      alt={review.author}
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Keyboard Navigation">
+    - Previous/Next buttons are keyboard accessible
+    - Expand/collapse buttons work with Enter/Space
+    - Focus indicators should be styled in CSS
+  </Accordion>
+  
+  <Accordion title="Color Contrast">
+    Ensure sufficient color contrast for text:
+    - Dark text on light backgrounds
+    - Minimum 4.5:1 contrast ratio for body text
+    - 3:1 for large text and UI elements
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Carousel not advancing">
+    Check:
+    - JavaScript console for errors
+    - `getMaxIndex()` returns correct value
+    - `autoPlayInterval` is being set
+    - Event listeners are attached
+  </Accordion>
+  
+  <Accordion title="Cards not displaying correctly">
+    Verify:
+    - Review data is properly formatted in JSON files
+    - CSS Grid/Flexbox is supported by browser
+    - `getCardsPerView()` returns expected values
+    - No CSS conflicts with global styles
+  </Accordion>
+  
+  <Accordion title="Images not loading">
+    Ensure:
+    - Avatar URLs are valid and accessible
+    - CORS headers are set for external images
+    - Fallback initial letter display works for missing avatars
+  </Accordion>
+</AccordionGroup>
+
+## Related Components
+
+- **Estrellas** - Star rating display component
+- **TrustBadges** - Trust indicator badges
+- **Autor** - Author bio with testimonial
+
+## Source Code References
+
+- GoogleReviews component: `src/components/GoogleReviews.astro:1-447`
+- Google reviews data: `src/data/google-reviews.json`
+- Testimonials data: `src/data/testimonios.json`

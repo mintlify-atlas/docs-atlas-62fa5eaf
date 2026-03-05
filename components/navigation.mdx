@@ -1,0 +1,586 @@
+---
+title: 'Navigation Components'
+description: 'NavBar and navigation menu components'
+icon: 'bars'
+---
+
+## Overview
+
+The navigation system provides a responsive, multi-level menu with icons, dropdown submenus, and mobile optimization. It integrates with Material Design Icons through astro-icon.
+
+## NavBar
+
+The main navigation component with responsive design, dropdown menus, and integrated WhatsApp call-to-action.
+
+### Props
+
+No props required - the component reads navigation data from `@/data/menu.json`.
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Dynamic Menu" icon="list">
+    Menu structure loaded from JSON configuration file for easy management.
+  </Card>
+  <Card title="Dropdown Submenus" icon="caret-down">
+    Multi-level navigation with animated dropdowns and toggle buttons.
+  </Card>
+  <Card title="Icon Integration" icon="icons">
+    Material Design Icons for visual navigation enhancement.
+  </Card>
+  <Card title="Mobile Responsive" icon="mobile">
+    Hamburger menu with slide-out navigation for mobile devices.
+  </Card>
+  <Card title="WhatsApp Integration" icon="whatsapp">
+    Direct WhatsApp contact buttons for desktop and mobile.
+  </Card>
+  <Card title="Highlight Markers" icon="star">
+    Visual indicators for featured menu items (e.g., special offers).
+  </Card>
+</CardGroup>
+
+### Usage
+
+<CodeGroup>
+```astro Basic Layout
+---
+import NavBar from '@/components/NavBar.astro';
+import Footer from '@/components/Footer.astro';
+---
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Site</title>
+  </head>
+  <body>
+    <NavBar />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+```
+
+```astro In Layout Component
+---
+// src/layouts/Layout.astro
+import NavBar from '@/components/NavBar.astro';
+import Footer from '@/components/Footer.astro';
+import '@/styles/global.css';
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <NavBar />
+    <slot />
+    <Footer />
+  </body>
+</html>
+```
+</CodeGroup>
+
+## Menu Configuration
+
+The navigation menu is configured through `src/data/menu.json`:
+
+### Menu Structure
+
+<CodeGroup>
+```json Basic Menu Item
+{
+  "id": "4",
+  "titulo": "BLOG",
+  "link": "/blog/",
+  "icon": "mdi:text-box-outline"
+}
+```
+
+```json Menu with Submenu
+{
+  "id": "1",
+  "titulo": "SERVICIOS",
+  "link": "/servicios/todos-los-servicios-web/",
+  "icon": "mdi:view-grid",
+  "submenu": [
+    {
+      "id": "1-1",
+      "titulo": "DISEÑO WEB",
+      "link": "/servicios/creacion-de-paginas-web/"
+    },
+    {
+      "id": "1-2",
+      "titulo": "TIENDAS ONLINE",
+      "link": "/servicios/creacion-de-tiendas-online/"
+    }
+  ]
+}
+```
+
+```json Highlighted Menu Item
+{
+  "id": "2",
+  "titulo": "OFERTAS",
+  "link": "/promociones/todas-las-promociones-web/",
+  "icon": "mdi:tag",
+  "highlight": true,
+  "submenu": [
+    {
+      "id": "2-1",
+      "titulo": "WEB ECONÓMICA",
+      "link": "/promociones/web-onepage-en-oferta/"
+    }
+  ]
+}
+```
+</CodeGroup>
+
+### Menu Schema
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the menu item. Use format like "1", "2", or "1-1" for submenu items.
+</ParamField>
+
+<ParamField path="titulo" type="string" required>
+  Display text for the menu item. Typically uppercase for consistency.
+</ParamField>
+
+<ParamField path="link" type="string" required>
+  URL path or external link for the menu item.
+</ParamField>
+
+<ParamField path="icon" type="string">
+  Material Design Icon identifier (e.g., "mdi:view-grid"). Used for visual enhancement.
+</ParamField>
+
+<ParamField path="highlight" type="boolean" default="false">
+  Whether to apply highlight styling. Used for promotional or important items.
+</ParamField>
+
+<ParamField path="submenu" type="array">
+  Array of submenu items. Each submenu item should have `id`, `titulo`, and `link` properties.
+</ParamField>
+
+### Complete Example
+
+```json
+[
+  {
+    "id": "1",
+    "titulo": "SERVICIOS",
+    "link": "/servicios/todos-los-servicios-web/",
+    "icon": "mdi:view-grid",
+    "submenu": [
+      {
+        "id": "1-1",
+        "titulo": "DISEÑO WEB",
+        "link": "/servicios/creacion-de-paginas-web/"
+      },
+      {
+        "id": "1-2",
+        "titulo": "TIENDAS ONLINE",
+        "link": "/servicios/creacion-de-tiendas-online/"
+      },
+      {
+        "id": "1-3",
+        "titulo": "SEO Y MARKETING",
+        "link": "/servicios/promocion-de-la-web/"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "titulo": "OFERTAS",
+    "link": "/promociones/todas-las-promociones-web/",
+    "icon": "mdi:tag",
+    "highlight": true,
+    "submenu": [
+      {
+        "id": "2-1",
+        "titulo": "WEB ECONÓMICA",
+        "link": "/promociones/web-onepage-en-oferta/"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "titulo": "BLOG",
+    "link": "/blog/",
+    "icon": "mdi:text-box-outline"
+  }
+]
+```
+
+## Component Structure
+
+### Header Layout
+
+```html
+<header>
+  <!-- Logo -->
+  <a href="/" class="logo">
+    <img src="/img/logotipoAYW.webp" alt="Arte y Web Creaciones" />
+  </a>
+  
+  <!-- Mobile WhatsApp Button -->
+  <a href="https://wa.me/..." class="soloMovil header-whatsapp">
+    <Icon name="mdi:whatsapp" />
+  </a>
+  
+  <!-- Mobile Menu Toggle -->
+  <input type="checkbox" id="menu-bar" />
+  <label for="menu-bar">
+    <Icon name="mdi:menu" />
+  </label>
+  
+  <!-- Navigation Menu -->
+  <nav class="navbar">
+    <!-- Menu items -->
+  </nav>
+  
+  <!-- Desktop WhatsApp Button -->
+  <a href="https://wa.me/..." class="soloPC btn btn-verde">
+    WhatsApp
+  </a>
+</header>
+```
+
+### Menu Item Template
+
+The component renders menu items dynamically:
+
+```astro
+<!-- Location: src/components/NavBar.astro:32-62 -->
+<li id={item.id} class="menu-item">
+  <a
+    href={item.submenu ? "#" : item.link}
+    class={`menu-link ${item.highlight ? "highlight-marker" : ""}`}
+  >
+    {item.icon && <Icon name={item.icon} class="menu-icon" />}
+    <span class="menu-text">{item.titulo}</span>
+    {item.submenu && <Icon name="mdi:chevron-down" class="dropdown-icon" />}
+  </a>
+  
+  {item.submenu && (
+    <>
+      <button class="submenu-toggle" aria-label="Toggle submenu">
+        <Icon name="mdi:chevron-down" />
+      </button>
+      <ul class="submenu hidden">
+        {item.submenu.map((subitem) => (
+          <li id={subitem.id}>
+            <a href={subitem.link}>{subitem.titulo}</a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</li>
+```
+
+## Styling
+
+The NavBar uses an external CSS file for styling:
+
+```astro
+<style>
+  @import "../styles/NavBar.css";
+</style>
+```
+
+<Info>
+  The actual styling rules are maintained in `src/styles/NavBar.css` for better organization and reusability.
+</Info>
+
+### CSS Classes
+
+<AccordionGroup>
+  <Accordion title="Layout Classes">
+    - `.logo` - Logo container with responsive sizing
+    - `.navbar` - Main navigation container
+    - `.menu-item` - Individual menu item wrapper
+    - `.menu-link` - Clickable menu link
+  </Accordion>
+  
+  <Accordion title="Icon Classes">
+    - `.menu-icon` - Icon displayed before menu text
+    - `.dropdown-icon` - Chevron icon for dropdown indicators
+    - `.submenu-toggle` - Mobile submenu toggle button
+  </Accordion>
+  
+  <Accordion title="State Classes">
+    - `.highlight-marker` - Highlighted menu item styling
+    - `.hidden` - Hidden submenu (toggled via JavaScript)
+    - `.visible` - Visible submenu after toggle
+  </Accordion>
+  
+  <Accordion title="Responsive Classes">
+    - `.soloMovil` - Visible only on mobile devices
+    - `.soloPC` - Visible only on desktop devices
+  </Accordion>
+</AccordionGroup>
+
+## JavaScript Functionality
+
+The component includes client-side JavaScript for interactive behavior:
+
+### Submenu Toggle
+
+```javascript
+// Location: src/components/NavBar.astro:85-96
+menuLinks.forEach((link) => {
+  link.addEventListener('click', (e) => {
+    const submenu = link.nextElementSibling?.nextElementSibling;
+    if (submenu && submenu.classList.contains('submenu')) {
+      e.preventDefault();
+      submenu.classList.toggle('visible');
+    }
+  });
+});
+```
+
+### Mobile Toggle Button
+
+```javascript
+// Location: src/components/NavBar.astro:99-107
+submenuToggles.forEach((toggle) => {
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const submenu = toggle.nextElementSibling;
+    if (submenu && submenu.classList.contains('submenu')) {
+      submenu.classList.toggle('visible');
+    }
+  });
+});
+```
+
+### Click Outside to Close
+
+```javascript
+// Location: src/components/NavBar.astro:119-124
+document.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target && !target.closest('.menu-item')) {
+    closeAllSubmenus();
+  }
+});
+```
+
+## WhatsApp Integration
+
+The NavBar includes two WhatsApp buttons with pre-filled messages:
+
+### Mobile Button
+
+```astro
+<!-- Location: src/components/NavBar.astro:16-24 -->
+<a
+  href="https://wa.me/34722201687?text=Hola,%20quiero%20mi%20presupuesto%20GRATIS%20en%2024h"
+  class="soloMovil header-whatsapp"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Contactar por WhatsApp"
+>
+  <Icon name="mdi:whatsapp" class="text-3xl text-green-500" />
+</a>
+```
+
+### Desktop Button
+
+```astro
+<!-- Location: src/components/NavBar.astro:65-72 -->
+<a
+  href="https://wa.me/34722201687?text=Hola,%20quiero%20mi%20presupuesto%20GRATIS%20en%2024h"
+  class="soloPC btn btn-verde"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Icon name="mdi:whatsapp" class="inline-block text-xl mr-1" /> WhatsApp
+</a>
+```
+
+<Tip>
+  Customize the WhatsApp number and pre-filled message by editing the `href` attribute. The text is URL-encoded.
+</Tip>
+
+## Icon Usage
+
+The component uses astro-icon for Material Design Icons:
+
+### Available Icons
+
+<CardGroup cols={3}>
+  <Card title="mdi:view-grid" icon="grid">
+    Grid view (used for Services)
+  </Card>
+  <Card title="mdi:tag" icon="tag">
+    Tag/label (used for Offers)
+  </Card>
+  <Card title="mdi:account-group" icon="users">
+    User group (used for About)
+  </Card>
+  <Card title="mdi:text-box-outline" icon="file-text">
+    Document (used for Blog)
+  </Card>
+  <Card title="mdi:calculator" icon="calculator">
+    Calculator (used for Quote)
+  </Card>
+  <Card title="mdi:whatsapp" icon="message-circle">
+    WhatsApp logo
+  </Card>
+  <Card title="mdi:menu" icon="menu">
+    Hamburger menu
+  </Card>
+  <Card title="mdi:chevron-down" icon="chevron-down">
+    Dropdown indicator
+  </Card>
+</CardGroup>
+
+### Adding Custom Icons
+
+```astro
+<Icon name="mdi:icon-name" class="custom-class" />
+```
+
+Browse available icons at [Material Design Icons](https://pictogrammers.com/library/mdi/).
+
+## Customization Examples
+
+### Adding a New Menu Item
+
+<Steps>
+  <Step title="Update menu.json">
+    Add a new entry to the menu configuration:
+    
+    ```json
+    {
+      "id": "6",
+      "titulo": "PORTFOLIO",
+      "link": "/portfolio/",
+      "icon": "mdi:briefcase"
+    }
+    ```
+  </Step>
+  
+  <Step title="Verify Icon">
+    Ensure the icon name exists in the Material Design Icons library.
+  </Step>
+  
+  <Step title="Test Navigation">
+    Refresh the page and verify the new menu item appears and functions correctly.
+  </Step>
+</Steps>
+
+### Creating a Mega Menu
+
+For complex submenus with multiple columns:
+
+```json
+{
+  "id": "1",
+  "titulo": "SERVICIOS",
+  "link": "/servicios/",
+  "icon": "mdi:view-grid",
+  "submenu": [
+    {
+      "id": "1-1",
+      "titulo": "DISEÑO WEB",
+      "link": "/servicios/diseno-web/"
+    },
+    {
+      "id": "1-2",
+      "titulo": "E-COMMERCE",
+      "link": "/servicios/tienda-online/"
+    },
+    {
+      "id": "1-3",
+      "titulo": "SEO",
+      "link": "/servicios/seo/"
+    },
+    {
+      "id": "1-4",
+      "titulo": "MARKETING",
+      "link": "/servicios/marketing/"
+    },
+    {
+      "id": "1-5",
+      "titulo": "HOSTING",
+      "link": "/servicios/hosting/"
+    },
+    {
+      "id": "1-6",
+      "titulo": "MANTENIMIENTO",
+      "link": "/servicios/mantenimiento/"
+    }
+  ]
+}
+```
+
+<Note>
+  For mega menus with more than 6 items, consider custom CSS to display in multiple columns.
+</Note>
+
+## Accessibility
+
+<AccordionGroup>
+  <Accordion title="Semantic HTML">
+    - Uses `<header>` for page header
+    - `<nav>` for navigation container
+    - Proper `<ul>` and `<li>` structure for menus
+  </Accordion>
+  
+  <Accordion title="ARIA Labels">
+    - `aria-label="Toggle submenu"` on mobile toggle buttons
+    - `aria-label="Contactar por WhatsApp"` on mobile WhatsApp button
+  </Accordion>
+  
+  <Accordion title="Keyboard Navigation">
+    - All links and buttons are keyboard accessible
+    - Submenu toggles work with Enter/Space keys
+    - Focus indicators should be styled in CSS
+  </Accordion>
+  
+  <Accordion title="Link Attributes">
+    - `rel="noopener noreferrer"` on external links
+    - `target="_blank"` for external navigation
+    - Descriptive link text
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep Menu Simple" icon="list">
+    Limit top-level items to 5-7 for optimal usability. Use submenus for additional pages.
+  </Card>
+  <Card title="Consistent Naming" icon="text">
+    Use consistent capitalization and terminology across menu items.
+  </Card>
+  <Card title="Icon Consistency" icon="icons">
+    Choose icons that clearly represent their menu item and maintain a consistent style.
+  </Card>
+  <Card title="Test Mobile" icon="mobile">
+    Always test navigation on actual mobile devices, not just browser responsive mode.
+  </Card>
+</CardGroup>
+
+## Related Components
+
+- **Footer** - Site footer with navigation links
+- **Breadcrumbs** - Breadcrumb navigation for page hierarchy
+- **HeaderLink** - Individual navigation link component
+
+## Source Code References
+
+- NavBar component: `src/components/NavBar.astro:1-128`
+- Menu data: `src/data/menu.json`
+- Styles: `src/styles/NavBar.css`

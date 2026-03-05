@@ -1,0 +1,419 @@
+---
+title: Tailwind CSS Integration
+description: Configure and customize Tailwind CSS for styling Arte y Web Creaciones
+---
+
+## Overview
+
+The project uses Tailwind CSS for utility-first styling with custom theme extensions for brand colors and design system.
+
+## Installation
+
+Tailwind is integrated via the official Astro integration:
+
+```bash
+npm install @astrojs/tailwind tailwindcss
+```
+
+## Astro Integration
+
+Enable Tailwind in `astro.config.mjs`:
+
+```javascript
+import tailwind from '@astrojs/tailwind';
+
+export default defineConfig({
+  integrations: [
+    tailwind(),
+    // ... other integrations
+  ],
+});
+```
+
+## Tailwind Configuration
+
+Custom configuration in `tailwind.config.mjs`:
+
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#22c55e',
+      },
+    },
+  },
+  plugins: [],
+}
+```
+
+## Content Configuration
+
+### File Scanning
+
+Tailwind scans these patterns for class usage:
+
+```javascript
+content: [
+  './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'
+]
+```
+
+**Includes:**
+- Astro components
+- HTML templates
+- JavaScript/TypeScript files
+- MDX content
+- Framework components (Vue, Svelte, etc.)
+
+<Warning>
+Classes not found in scanned files will be purged from production builds.
+</Warning>
+
+## Theme Customization
+
+### Brand Colors
+
+Primary brand color defined as `primary`:
+
+```javascript
+colors: {
+  primary: '#22c55e', // Green
+}
+```
+
+**Usage:**
+
+```astro
+<button class="bg-primary text-white hover:bg-primary/90">
+  Click me
+</button>
+```
+
+### Additional Colors
+
+Add more brand colors:
+
+```javascript
+colors: {
+  primary: '#22c55e',
+  secondary: '#3b82f6',
+  accent: '#f59e0b',
+  dark: '#1f2937',
+  light: '#f3f4f6',
+}
+```
+
+### Typography
+
+Extend font families:
+
+```javascript
+theme: {
+  extend: {
+    fontFamily: {
+      sans: ['Inter', 'system-ui', 'sans-serif'],
+      heading: ['Outfit', 'sans-serif'],
+    },
+  },
+}
+```
+
+### Spacing
+
+Custom spacing values:
+
+```javascript
+theme: {
+  extend: {
+    spacing: {
+      '128': '32rem',
+      '144': '36rem',
+    },
+  },
+}
+```
+
+## Using Tailwind
+
+### In Astro Components
+
+```astro
+---
+// Component logic
+---
+
+<section class="bg-gray-50 py-16">
+  <div class="container mx-auto px-4">
+    <h2 class="text-4xl font-bold text-gray-900 mb-8">
+      Heading
+    </h2>
+    <p class="text-lg text-gray-600">
+      Content
+    </p>
+  </div>
+</section>
+```
+
+### With Custom CSS
+
+Combine with custom styles:
+
+```astro
+---
+// Component
+---
+
+<div class="card">
+  <h3 class="text-2xl font-bold">Title</h3>
+</div>
+
+<style>
+  .card {
+    @apply bg-white rounded-lg shadow-lg p-6;
+  }
+</style>
+```
+
+### Responsive Design
+
+```astro
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <!-- Responsive grid -->
+</div>
+```
+
+**Breakpoints:**
+
+| Prefix | Min Width | Description |
+|--------|-----------|-------------|
+| `sm:` | 640px | Small devices |
+| `md:` | 768px | Medium devices |
+| `lg:` | 1024px | Large devices |
+| `xl:` | 1280px | Extra large |
+| `2xl:` | 1536px | 2X large |
+
+### Dark Mode
+
+Enable dark mode (if needed):
+
+```javascript
+// tailwind.config.mjs
+export default {
+  darkMode: 'class',
+  // ... rest of config
+}
+```
+
+Usage:
+
+```astro
+<div class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+  Content
+</div>
+```
+
+## Plugins
+
+### Typography Plugin
+
+For rich text formatting:
+
+```bash
+npm install @tailwindcss/typography
+```
+
+```javascript
+// tailwind.config.mjs
+import typography from '@tailwindcss/typography';
+
+export default {
+  plugins: [typography],
+}
+```
+
+Usage:
+
+```astro
+<article class="prose lg:prose-xl">
+  <Content />
+</article>
+```
+
+### Forms Plugin
+
+Better form styling:
+
+```bash
+npm install @tailwindcss/forms
+```
+
+```javascript
+import forms from '@tailwindcss/forms';
+
+export default {
+  plugins: [forms],
+}
+```
+
+### Container Queries
+
+Responsive components:
+
+```bash
+npm install @tailwindcss/container-queries
+```
+
+```javascript
+import containerQueries from '@tailwindcss/container-queries';
+
+export default {
+  plugins: [containerQueries],
+}
+```
+
+## Optimization
+
+### Production Builds
+
+Tailwind automatically:
+- Purges unused CSS
+- Minifies output
+- Optimizes for performance
+
+### JIT Mode
+
+Just-In-Time mode is enabled by default:
+- Instant build times
+- All variants available
+- Arbitrary values supported
+
+```astro
+<div class="w-[347px] top-[117px]">
+  <!-- Arbitrary values -->
+</div>
+```
+
+## Custom Directives
+
+### @apply
+
+```css
+.btn {
+  @apply px-4 py-2 bg-primary text-white rounded hover:bg-primary/90;
+}
+```
+
+### @layer
+
+```css
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow p-6;
+  }
+}
+```
+
+### @variants
+
+```css
+@variants hover, focus {
+  .custom-utility {
+    /* styles */
+  }
+}
+```
+
+## Global Styles
+
+Base styles in `src/styles/global.css`:
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900;
+  }
+  
+  h1 {
+    @apply text-4xl font-bold;
+  }
+}
+```
+
+Import in layout:
+
+```astro
+---
+import '../styles/global.css';
+---
+```
+
+## Best Practices
+
+### Component Classes
+
+Extract repeated patterns:
+
+```astro
+---
+const buttonClass = "px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition";
+---
+
+<button class={buttonClass}>Button 1</button>
+<button class={buttonClass}>Button 2</button>
+```
+
+### Conditional Classes
+
+```astro
+---
+const variant = 'primary';
+const variantClasses = {
+  primary: 'bg-primary text-white',
+  secondary: 'bg-gray-500 text-white',
+};
+---
+
+<button class={`px-4 py-2 ${variantClasses[variant]}`}>
+  Button
+</button>
+```
+
+### Avoiding Purge Issues
+
+Don't construct class names dynamically:
+
+```astro
+<!-- ❌ Bad: Will be purged -->
+<div class={`text-${color}-500`}></div>
+
+<!-- ✅ Good: Complete class names -->
+<div class={color === 'red' ? 'text-red-500' : 'text-blue-500'}></div>
+```
+
+## VS Code Integration
+
+Install Tailwind CSS IntelliSense:
+
+```json
+{
+  "tailwindCSS.includeLanguages": {
+    "astro": "html"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+}
+```
+
+## Related Documentation
+
+- [Astro Configuration](/configuration/astro-config)
+- [Component Styling](/components/overview)
+- [Layout Components](/sections/layout-structure)

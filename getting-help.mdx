@@ -1,0 +1,316 @@
+---
+title: Getting Help
+description: Support resources and how to get help with the Arte y Web Creaciones project
+---
+
+Need assistance with the Arte y Web Creaciones project? This page outlines all available support channels and resources to help you get unstuck.
+
+## Documentation Resources
+
+<CardGroup cols={2}>
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+Get your development environment set up
+</Card>
+
+<Card title="Astro Framework" icon="book" href="/concepts/astro-framework">
+Learn how Astro powers this project
+</Card>
+
+<Card title="Content Collections" icon="folder" href="/concepts/content-collections">
+Understand the content structure
+</Card>
+
+<Card title="Component Architecture" icon="puzzle-piece" href="/concepts/component-architecture">
+Explore component patterns
+</Card>
+
+</CardGroup>
+
+## Official Astro Resources
+
+Since this project is built with Astro, the official Astro documentation is your best friend:
+
+### Astro Documentation
+
+<Card title="Astro Docs" icon="book-open" href="https://docs.astro.build">
+Comprehensive documentation for Astro framework
+</Card>
+
+Key sections to explore:
+
+- **[Core Concepts](https://docs.astro.build/en/concepts/why-astro/)** - Understanding Astro's architecture
+- **[Content Collections](https://docs.astro.build/en/guides/content-collections/)** - Official guide to content collections
+- **[Routing](https://docs.astro.build/en/guides/routing/)** - File-based routing system
+- **[Components](https://docs.astro.build/en/basics/astro-components/)** - Creating and using Astro components
+- **[Integrations](https://docs.astro.build/en/guides/integrations-guide/)** - Working with Tailwind, MDX, and other integrations
+
+### Astro Community
+
+<CardGroup cols={2}>
+
+<Card title="Discord Server" icon="discord" href="https://astro.build/chat">
+Join the Astro Discord community for real-time help
+</Card>
+
+<Card title="GitHub Discussions" icon="github" href="https://github.com/withastro/astro/discussions">
+Ask questions and share ideas
+</Card>
+
+</CardGroup>
+
+## Technology Stack Resources
+
+The project uses several key technologies. Here are official resources for each:
+
+### Tailwind CSS
+
+<Card title="Tailwind CSS Documentation" icon="palette" href="https://tailwindcss.com/docs">
+Complete utility-first CSS framework documentation
+</Card>
+
+- **[Utility Classes](https://tailwindcss.com/docs/utility-first)** - Core Tailwind concepts
+- **[Responsive Design](https://tailwindcss.com/docs/responsive-design)** - Mobile-first breakpoints
+- **[Customization](https://tailwindcss.com/docs/configuration)** - Configuring Tailwind
+
+### MDX
+
+<Card title="MDX Documentation" icon="markdown" href="https://mdxjs.com/">
+Markdown with JSX - used for blog posts and content
+</Card>
+
+### Astro Icon
+
+<Card title="Astro Icon" icon="icons" href="https://github.com/natemoo-re/astro-icon">
+Icon system documentation - using Material Design Icons (MDI)
+</Card>
+
+<Note>
+This project uses the `@iconify-json/mdi` package for Material Design Icons. You can browse available icons at [Iconify](https://icon-sets.iconify.design/mdi/).
+</Note>
+
+## Common Questions
+
+<AccordionGroup>
+
+<Accordion title="How do I add a new page?">
+Pages in Astro use file-based routing. Create a new `.astro` file in `src/pages/`:
+
+```astro src/pages/my-page.astro
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="My Page" description="Page description">
+  <h1>My New Page</h1>
+  <p>Content goes here</p>
+</Layout>
+```
+
+The page will be available at `/my-page`.
+</Accordion>
+
+<Accordion title="How do I add a new blog post?">
+Create a new Markdown or MDX file in `src/content/blog/`:
+
+```md src/content/blog/my-post.md
+---
+title: "My Blog Post Title"
+description: "A compelling description"
+pubDate: '2026-03-05'
+heroImage: "/img/posts/my-image.webp"
+draft: false
+tags: ["web design", "tutorial"]
+publisher: "Arte y Web Creaciones"
+---
+
+Your blog content here...
+```
+
+The post will automatically be available at `/blog/my-post`.
+</Accordion>
+
+<Accordion title="Where are styles defined?">
+Styles in this project come from multiple sources:
+
+1. **Tailwind CSS** - Utility classes used throughout components
+2. **Global styles** - `src/styles/global.css` and `src/styles/estiloBase.css`
+3. **Component styles** - Scoped `<style>` blocks in `.astro` files
+4. **Google Fonts** - Inter and Outfit fonts loaded in Layout.astro
+</Accordion>
+
+<Accordion title="How do I work with images?">
+Images should be placed in the `public/` directory:
+
+- Blog images: `public/img/posts/`
+- General images: `public/img/`
+- Icons/logos: `public/img/`
+
+Reference them with absolute paths:
+
+```astro
+<img src="/img/posts/my-image.webp" alt="Description" />
+```
+
+The project uses WebP format for optimized images.
+</Accordion>
+
+<Accordion title="What's the '@/' import alias?">
+The `@/` alias is configured in `tsconfig.json` to reference the `src/` directory:
+
+```js
+// Instead of:
+import Layout from "../../layouts/Layout.astro";
+
+// You can write:
+import Layout from "@/layouts/Layout.astro";
+```
+
+This makes imports cleaner and easier to refactor.
+</Accordion>
+
+<Accordion title="How do I add a new content collection?">
+Content collections are defined in `src/content.config.ts`. To add a new collection:
+
+1. Define the schema using Zod
+2. Add the collection to the exports
+3. Create a directory in `src/content/`
+
+Example:
+
+```ts src/content.config.ts
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+const myCollection = defineCollection({
+  loader: glob({ 
+    base: './src/content/myCollection', 
+    pattern: '**/*.{md,mdx}' 
+  }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+  }),
+});
+
+export const collections = {
+  // ... existing collections
+  myCollection,
+};
+```
+</Accordion>
+
+<Accordion title="How do I use icons?">
+The project uses Astro Icon with Material Design Icons:
+
+```astro
+---
+import { Icon } from "astro-icon/components";
+---
+
+<Icon name="mdi:check-circle" class="w-6 h-6 text-green-500" />
+```
+
+Browse available icons at [Iconify - MDI](https://icon-sets.iconify.design/mdi/).
+</Accordion>
+
+<Accordion title="What's the difference between components and sections?">
+- **Components** (`src/components/`) - Smaller, reusable UI elements (buttons, alerts, forms)
+- **Sections** (`src/sections/`) - Larger page sections that compose multiple components (Hero, Testimonials, Portfolio)
+
+This is an organizational pattern to keep the codebase structured.
+</Accordion>
+
+</AccordionGroup>
+
+## Troubleshooting
+
+### Build Errors
+
+If you encounter build errors:
+
+<Steps>
+
+<Step title="Clear the cache">
+```bash
+rm -rf .astro dist
+npm run build
+```
+</Step>
+
+<Step title="Reinstall dependencies">
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+</Step>
+
+<Step title="Check Node version">
+```bash
+node --version
+# Should be v20.x.x
+```
+</Step>
+
+</Steps>
+
+### Development Server Issues
+
+<Warning>
+If the dev server stops responding, restart it with `Ctrl+C` then `npm run dev`.
+</Warning>
+
+Common fixes:
+- Clear browser cache
+- Try a different port in `astro.config.mjs`
+- Check for syntax errors in recently edited files
+
+## Getting Project-Specific Help
+
+### Codebase Navigation
+
+<Note>
+Use your IDE's "Go to Definition" feature (F12 in VS Code) to quickly navigate to component definitions and understand how they work.
+</Note>
+
+Key files to understand:
+
+- **`src/layouts/Layout.astro`** - Main layout wrapper with SEO and meta tags
+- **`src/content.config.ts`** - Content collection schemas
+- **`astro.config.mjs`** - Project configuration
+- **`src/consts.ts`** - Global constants and site metadata
+
+### Reading the Code
+
+<Steps>
+
+<Step title="Start with pages">
+Pages in `src/pages/` show how everything comes together. The homepage (`index.astro`) is a great starting point.
+</Step>
+
+<Step title="Follow the imports">
+Trace imports to understand component composition and data flow.
+</Step>
+
+<Step title="Check content collections">
+Look at examples in `src/content/blog/` to understand the content structure.
+</Step>
+
+<Step title="Experiment">
+Make small changes and see what happens. Astro's fast refresh makes experimentation easy.
+</Step>
+
+</Steps>
+
+## Still Stuck?
+
+If you can't find the answer you need:
+
+1. **Search the Astro docs** - Most questions about Astro functionality are answered there
+2. **Check existing blog posts** - The `src/content/blog/` directory has examples of various patterns
+3. **Review similar components** - Find a similar component and see how it's implemented
+4. **Ask in Astro Discord** - The community is helpful and responsive
+
+<Card title="Astro Discord" icon="discord" href="https://astro.build/chat">
+Join the Astro community Discord server for real-time help
+</Card>

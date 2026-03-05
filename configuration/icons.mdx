@@ -1,0 +1,437 @@
+---
+title: Astro Icon Setup
+description: Configure and use the Astro Icon system with Material Design Icons
+---
+
+## Overview
+
+The project uses `astro-icon` for a flexible icon system with Material Design Icons (MDI) as the primary icon set.
+
+## Installation
+
+Install the icon packages:
+
+```bash
+npm install astro-icon @iconify-json/mdi
+```
+
+## Astro Integration
+
+Configure in `astro.config.mjs`:
+
+```javascript
+import icon from 'astro-icon';
+
+export default defineConfig({
+  integrations: [
+    icon({
+      include: {
+        mdi: ['*'], // Include all MDI icons
+      },
+    }),
+    // ... other integrations
+  ],
+});
+```
+
+## Configuration Options
+
+### Include Specific Icons
+
+For better performance, include only needed icons:
+
+```javascript
+icon({
+  include: {
+    mdi: [
+      'check',
+      'close',
+      'menu',
+      'arrow-right',
+      'email',
+      'phone',
+    ],
+  },
+})
+```
+
+### Include All Icons
+
+Current configuration includes all MDI icons:
+
+```javascript
+icon({
+  include: {
+    mdi: ['*'], // All Material Design Icons
+  },
+})
+```
+
+<Note>
+Including all icons increases bundle size. Consider limiting to used icons in production.
+</Note>
+
+## Using Icons
+
+### Basic Usage
+
+```astro
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<Icon name="mdi:check" />
+<Icon name="mdi:email" />
+<Icon name="mdi:phone" />
+```
+
+### With Size
+
+```astro
+<Icon name="mdi:check" size={24} />
+<Icon name="mdi:email" size={32} />
+<Icon name="mdi:star" size="3rem" />
+```
+
+### With Color
+
+```astro
+<!-- Tailwind classes -->
+<Icon name="mdi:check" class="text-green-500" />
+<Icon name="mdi:close" class="text-red-500" />
+<Icon name="mdi:info" class="text-blue-500" />
+```
+
+### With Styling
+
+```astro
+<Icon 
+  name="mdi:heart" 
+  class="text-red-500 hover:text-red-600 transition"
+  size={28}
+/>
+```
+
+## Icon Sets
+
+### Material Design Icons (MDI)
+
+Primary icon set with 7000+ icons:
+
+```astro
+<Icon name="mdi:home" />
+<Icon name="mdi:account" />
+<Icon name="mdi:settings" />
+<Icon name="mdi:email" />
+<Icon name="mdi:phone" />
+<Icon name="mdi:cart" />
+```
+
+Browse icons: [materialdesignicons.com](https://materialdesignicons.com)
+
+### Additional Icon Sets
+
+Install other Iconify sets:
+
+```bash
+# Font Awesome
+npm install @iconify-json/fa6-solid
+
+# Heroicons
+npm install @iconify-json/heroicons
+
+# Bootstrap Icons
+npm install @iconify-json/bi
+```
+
+Configure:
+
+```javascript
+icon({
+  include: {
+    mdi: ['*'],
+    'fa6-solid': ['user', 'heart', 'star'],
+    heroicons: ['*'],
+  },
+})
+```
+
+Usage:
+
+```astro
+<Icon name="fa6-solid:user" />
+<Icon name="heroicons:home" />
+<Icon name="bi:github" />
+```
+
+## Common Patterns
+
+### Button with Icon
+
+```astro
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded">
+  <Icon name="mdi:email" size={20} />
+  <span>Contact Us</span>
+</button>
+```
+
+### Icon List
+
+```astro
+<ul class="space-y-3">
+  <li class="flex items-center gap-2">
+    <Icon name="mdi:check" class="text-green-500" />
+    <span>Fast delivery</span>
+  </li>
+  <li class="flex items-center gap-2">
+    <Icon name="mdi:check" class="text-green-500" />
+    <span>24/7 support</span>
+  </li>
+  <li class="flex items-center gap-2">
+    <Icon name="mdi:check" class="text-green-500" />
+    <span>Money back guarantee</span>
+  </li>
+</ul>
+```
+
+### Social Media Icons
+
+```astro
+<div class="flex gap-4">
+  <a href="https://facebook.com" class="text-gray-600 hover:text-primary">
+    <Icon name="mdi:facebook" size={24} />
+  </a>
+  <a href="https://twitter.com" class="text-gray-600 hover:text-primary">
+    <Icon name="mdi:twitter" size={24} />
+  </a>
+  <a href="https://instagram.com" class="text-gray-600 hover:text-primary">
+    <Icon name="mdi:instagram" size={24} />
+  </a>
+  <a href="https://linkedin.com" class="text-gray-600 hover:text-primary">
+    <Icon name="mdi:linkedin" size={24} />
+  </a>
+</div>
+```
+
+### Feature Cards
+
+```astro
+---
+const features = [
+  { icon: 'mdi:rocket', title: 'Fast', description: 'Lightning speed' },
+  { icon: 'mdi:shield-check', title: 'Secure', description: 'Bank-level security' },
+  { icon: 'mdi:chart-line', title: 'Scalable', description: 'Grows with you' },
+];
+---
+
+<div class="grid grid-cols-3 gap-6">
+  {features.map(feature => (
+    <div class="text-center p-6 bg-white rounded-lg shadow">
+      <Icon name={feature.icon} class="text-primary mx-auto mb-4" size={48} />
+      <h3 class="text-xl font-bold mb-2">{feature.title}</h3>
+      <p class="text-gray-600">{feature.description}</p>
+    </div>
+  ))}
+</div>
+```
+
+## Advanced Usage
+
+### Dynamic Icons
+
+```astro
+---
+interface Props {
+  status: 'success' | 'error' | 'warning';
+}
+
+const { status } = Astro.props;
+
+const iconMap = {
+  success: { name: 'mdi:check-circle', color: 'text-green-500' },
+  error: { name: 'mdi:alert-circle', color: 'text-red-500' },
+  warning: { name: 'mdi:alert', color: 'text-yellow-500' },
+};
+
+const { name, color } = iconMap[status];
+---
+
+<Icon name={name} class={color} size={24} />
+```
+
+### Animated Icons
+
+```astro
+<Icon 
+  name="mdi:loading" 
+  class="animate-spin text-primary"
+  size={32}
+/>
+
+<Icon 
+  name="mdi:heart" 
+  class="hover:scale-110 transition-transform text-red-500"
+  size={24}
+/>
+```
+
+### Icon Component Wrapper
+
+```astro
+---
+// src/components/StatusIcon.astro
+interface Props {
+  type: 'success' | 'error' | 'info' | 'warning';
+  size?: number;
+}
+
+const { type, size = 24 } = Astro.props;
+
+const config = {
+  success: { icon: 'mdi:check-circle', class: 'text-green-500' },
+  error: { icon: 'mdi:close-circle', class: 'text-red-500' },
+  info: { icon: 'mdi:information', class: 'text-blue-500' },
+  warning: { icon: 'mdi:alert', class: 'text-yellow-500' },
+};
+
+const { icon, class: className } = config[type];
+---
+
+<Icon name={icon} class={className} size={size} />
+```
+
+Usage:
+
+```astro
+import StatusIcon from '@/components/StatusIcon.astro';
+
+<StatusIcon type="success" size={28} />
+<StatusIcon type="error" />
+```
+
+## Performance Optimization
+
+### Limit Icon Set
+
+Only include used icons:
+
+```javascript
+// astro.config.mjs
+icon({
+  include: {
+    mdi: [
+      'check', 'close', 'menu', 'email', 'phone',
+      'facebook', 'twitter', 'instagram', 'linkedin',
+      'home', 'cart', 'user', 'settings',
+    ],
+  },
+})
+```
+
+### Icon Sprite
+
+Astro Icon generates SVG sprites automatically for optimal performance.
+
+## Styling Options
+
+### Tailwind Classes
+
+```astro
+<Icon 
+  name="mdi:check" 
+  class="text-green-500 hover:text-green-600 transition-colors"
+/>
+```
+
+### Inline Styles
+
+```astro
+<Icon 
+  name="mdi:star" 
+  style="color: gold; filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));"
+/>
+```
+
+### CSS Classes
+
+```astro
+<Icon name="mdi:heart" class="favorite-icon" />
+
+<style>
+  .favorite-icon {
+    color: red;
+    transition: transform 0.2s;
+  }
+  
+  .favorite-icon:hover {
+    transform: scale(1.2);
+  }
+</style>
+```
+
+## Accessibility
+
+### Decorative Icons
+
+```astro
+<Icon name="mdi:star" aria-hidden="true" />
+```
+
+### Semantic Icons
+
+```astro
+<Icon name="mdi:email" aria-label="Email us" />
+
+<button>
+  <Icon name="mdi:close" aria-label="Close dialog" />
+</button>
+```
+
+## Common Icons
+
+### UI Elements
+
+```astro
+<Icon name="mdi:menu" />           <!-- Hamburger menu -->
+<Icon name="mdi:close" />          <!-- Close/X -->
+<Icon name="mdi:chevron-down" />   <!-- Dropdown arrow -->
+<Icon name="mdi:chevron-right" />  <!-- Next arrow -->
+<Icon name="mdi:search" />         <!-- Search -->
+```
+
+### Actions
+
+```astro
+<Icon name="mdi:plus" />           <!-- Add -->
+<Icon name="mdi:delete" />         <!-- Delete -->
+<Icon name="mdi:pencil" />         <!-- Edit -->
+<Icon name="mdi:content-copy" />   <!-- Copy -->
+<Icon name="mdi:download" />       <!-- Download -->
+```
+
+### Status
+
+```astro
+<Icon name="mdi:check" />          <!-- Success -->
+<Icon name="mdi:close" />          <!-- Error -->
+<Icon name="mdi:alert" />          <!-- Warning -->
+<Icon name="mdi:information" />    <!-- Info -->
+<Icon name="mdi:loading" />        <!-- Loading -->
+```
+
+### Social Media
+
+```astro
+<Icon name="mdi:facebook" />
+<Icon name="mdi:twitter" />
+<Icon name="mdi:instagram" />
+<Icon name="mdi:linkedin" />
+<Icon name="mdi:youtube" />
+<Icon name="mdi:github" />
+```
+
+## Related Documentation
+
+- [Astro Configuration](/configuration/astro-config)
+- [Component Library](/components/overview)
+- [Tailwind Integration](/configuration/tailwind)

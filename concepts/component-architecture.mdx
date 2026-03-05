@@ -1,0 +1,760 @@
+---
+title: Component Architecture
+description: How components are organized and composed in the Arte y Web Creaciones project
+---
+
+The Arte y Web Creaciones project uses a well-organized component architecture with **98 Astro components** structured into logical categories. This page explains the architecture patterns and how components work together.
+
+## Component Organization
+
+Components are organized into three main directories based on their purpose:
+
+```text
+src/
+├── components/          # 98 reusable UI components
+│   ├── Alert.astro
+│   ├── NavBar.astro
+│   ├── Footer.astro
+│   ├── Promociones/     # Promotion-related components
+│   ├── Legales/         # Legal components (cookies, privacy)
+│   ├── Modales/         # Modal dialogs
+│   └── Servicios/       # Service display components
+├── sections/            # Large page sections
+│   ├── Hero.astro
+│   ├── Testimonials.astro
+│   └── CardPortfolio.astro
+└── layouts/             # Page layout wrappers
+    ├── Layout.astro
+    └── BlogPost.astro
+```
+
+### Design Philosophy
+
+<CardGroup cols={3}>
+
+<Card title="Components" icon="cube">
+Small, reusable UI elements like buttons, alerts, and forms
+</Card>
+
+<Card title="Sections" icon="layer-group">
+Large page sections that compose multiple components
+</Card>
+
+<Card title="Layouts" icon="window-maximize">
+Full-page wrappers with consistent structure and SEO
+</Card>
+
+</CardGroup>
+
+## The Component Hierarchy
+
+Let's trace how components compose from top to bottom:
+
+```text
+Layout.astro                      (Top-level wrapper)
+└── <Navbar />
+└── <slot />                      (Page content)
+    └── Hero.astro                (Section)
+        └── UrgencyBanner.astro   (Component)
+    └── NuestrasWebs.astro        (Section)
+        └── PromoCard             (Component)
+            └── Icon              (Component)
+└── <Footer />
+└── <Cookies />
+```
+
+### Example: Homepage Structure
+
+Here's how the homepage (`src/pages/index.astro`) composes components:
+
+```astro src/pages/index.astro
+---
+import Layout from "@/layouts/Layout.astro";
+import Hero from "@/sections/Hero.astro";
+import TrustBadges from "@/components/TrustBadges.astro";
+import UrgencyBanner from "@/components/UrgencyBanner.astro";
+import NuestrasWebs from "@/sections/NuestrasWebs.astro";
+import GoogleReviews from "@/components/GoogleReviews.astro";
+
+const title = "Diseño de Páginas Web Profesionales desde 190€";
+const imageUrl = "/img/hero-premium.webp";
+---
+
+<Layout title={title} description="..." keywords="...">
+  <UrgencyBanner />
+  <Hero title={title} imageUrl={imageUrl} />
+  <TrustBadges />
+  
+  <section id="nuestras-webs">
+    <NuestrasWebs />
+  </section>
+  
+  <GoogleReviews />
+</Layout>
+```
+
+Each section is composed of smaller components, creating a hierarchy.
+
+## Layout Components
+
+Layout components wrap entire pages with consistent structure.
+
+### Main Layout (`Layout.astro`)
+
+The primary layout used by almost all pages:
+
+```astro src/layouts/Layout.astro
+---
+import Navbar from "@/components/NavBar.astro";
+import Footer from "@/components/Footer.astro";
+import Cookies from "@/components/Legales/Cookies.astro";
+import { Icon } from "astro-icon/components";
+
+import "../styles/reset.css";
+import "../styles/global.css";
+import "../styles/estiloBase.css";
+
+// SEO metadata with defaults
+const title = Astro.props.title || 
+  "Diseño Web Profesional desde 190€ | Arte y Web Creaciones";
+const description = Astro.props.description || 
+  "Diseño web profesional y tiendas online desde 190€";
+const pathname = Astro.url.pathname;
+const cleanPathname = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+const canonical = `https://arteywebcreaciones.com${cleanPathname}`;
+const keywords = Astro.props.keywords || "diseño web profesional, páginas web";
+const image = Astro.props.image || 
+  "https://arteywebcreaciones.com/img/hero-imagen.webp";
+---
+
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="keywords" content={keywords} />
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:url" content={canonical} />
+    
+    <!-- Schema.org structured data -->
+    <script is:inline type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "Arte y Web Creaciones",
+      "telephone": "+34722201687",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Benidorm",
+        "addressRegion": "Alicante",
+        "postalCode": "03503",
+        "addressCountry": "ES"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <Navbar />
+    <slot />
+    <Footer />
+    <Cookies />
+  </body>
+</html>
+```
+
+#### Layout Features
+
+<AccordionGroup>
+
+<Accordion title="SEO Metadata">
+The layout handles all SEO-critical tags:
+
+- **Title** - Page title with fallback
+- **Description** - Meta description
+- **Canonical URL** - Prevents duplicate content
+- **Keywords** - SEO keywords
+- **Open Graph** - Social media sharing tags
+- **Schema.org** - Structured data for search engines
+</Accordion>
+
+<Accordion title="Global Styles">
+Three global stylesheets are imported:
+
+```astro
+import "../styles/reset.css";      // CSS reset
+import "../styles/global.css";     // Global utilities
+import "../styles/estiloBase.css"; // Base styles
+```
+</Accordion>
+
+<Accordion title="Google Fonts">
+Two font families are loaded:
+
+- **Inter** (300, 400, 500, 600) - Body text
+- **Outfit** (400, 500, 600, 700, 800) - Headings
+
+Fonts are preconnected for performance.
+</Accordion>
+
+<Accordion title="Consistent Structure">
+Every page using this layout gets:
+
+- Navigation bar (top)
+- Page content (`<slot />`)
+- Footer (bottom)
+- Cookie consent banner
+</Accordion>
+
+</AccordionGroup>
+
+### Blog Layout (`BlogPost.astro`)
+
+A specialized layout for blog posts:
+
+```astro src/layouts/BlogPost.astro
+---
+import Layout from "@/layouts/Layout.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
+
+const { title, description, pubDate, heroImage } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <article class="blog-post">
+    <Breadcrumbs />
+    
+    {heroImage && (
+      <img src={heroImage} alt={title} class="hero-image" />
+    )}
+    
+    <header>
+      <h1>{title}</h1>
+      <FormattedDate date={pubDate} />
+    </header>
+    
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</Layout>
+```
+
+Blog posts nest this layout inside the main layout for consistent structure.
+
+## Atomic Components
+
+Small, reusable components that form the building blocks.
+
+### Alert Component
+
+A versatile alert component with multiple types:
+
+```astro src/components/Alert.astro
+---
+import { Icon } from "astro-icon/components";
+
+export interface Props {
+    type?: "info" | "success" | "warning" | "error" | "tip";
+    title?: string;
+}
+
+const { type = "info", title } = Astro.props;
+
+const types = {
+    info: {
+        bg: "bg-blue-50 border-blue-200",
+        iconColor: "text-blue-500",
+        icon: "mdi:information",
+        titleColor: "text-blue-800",
+    },
+    tip: {
+        bg: "bg-emerald-50 border-emerald-200",
+        iconColor: "text-emerald-500",
+        icon: "mdi:lightbulb-on",
+        titleColor: "text-emerald-800",
+    },
+    warning: {
+        bg: "bg-amber-50 border-amber-200",
+        iconColor: "text-amber-500",
+        icon: "mdi:alert",
+        titleColor: "text-amber-800",
+    },
+    error: {
+        bg: "bg-red-50 border-red-200",
+        iconColor: "text-red-500",
+        icon: "mdi:alert-circle",
+        titleColor: "text-red-800",
+    },
+    success: {
+        bg: "bg-green-50 border-green-200",
+        iconColor: "text-green-500",
+        icon: "mdi:check-circle",
+        titleColor: "text-green-800",
+    },
+};
+
+const current = types[type] || types.info;
+---
+
+<div class={`flex gap-4 p-[1.2rem] my-8 rounded-xl border-l-[6px] shadow-sm ${current.bg}`}>
+    <div class="flex-shrink-0 mt-1">
+        <Icon name={current.icon} class={`w-7 h-7 ${current.iconColor}`} />
+    </div>
+    <div class="flex-1">
+        {title && (
+            <h4 class={`font-bold text-lg !m-0 !mb-2 !p-0 ${current.titleColor}`}>
+                {title}
+            </h4>
+        )}
+        <div class="text-slate-700 !m-0 leading-relaxed font-medium">
+            <slot />
+        </div>
+    </div>
+</div>
+```
+
+#### Usage
+
+```astro
+<Alert type="tip" title="Pro Tip">
+  Use the Alert component to highlight important information.
+</Alert>
+
+<Alert type="warning">
+  Make sure to test your changes before deploying.
+</Alert>
+```
+
+This component is even used in MDX blog posts:
+
+```mdx src/content/blog/example.mdx
+<Alert type="success" title="Quick Win">
+  This technique can improve your site speed by 50%!
+</Alert>
+```
+
+### Icon Component
+
+Icons are used throughout with the `astro-icon` package:
+
+```astro
+---
+import { Icon } from "astro-icon/components";
+---
+
+<!-- Material Design Icons -->
+<Icon name="mdi:check-circle" class="w-6 h-6 text-green-500" />
+<Icon name="mdi:alert" class="w-5 h-5 text-amber-500" />
+<Icon name="mdi:information" class="w-8 h-8 text-blue-600" />
+```
+
+The project includes **all Material Design Icons** via the `@iconify-json/mdi` package.
+
+## Section Components
+
+Larger components that compose multiple smaller components.
+
+### Hero Section
+
+```astro src/sections/Hero.astro
+---
+export interface Props {
+  title: string;
+  subTitle: string;
+  imageUrl: string;
+  link: string;
+}
+
+const { title, subTitle, imageUrl, link } = Astro.props;
+---
+
+<section class="hero" style={`background-image: url(${imageUrl})`}>
+  <div class="hero-content">
+    <h1 set:html={title} />
+    <p class="subtitle">{subTitle}</p>
+    <a href={link} class="cta-button">Solicitar Presupuesto</a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 600px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hero-content {
+    text-align: center;
+    color: white;
+    max-width: 800px;
+    padding: 2rem;
+  }
+  
+  h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+  
+  .subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .cta-button {
+    background: #f97316;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: background 0.3s;
+  }
+  
+  .cta-button:hover {
+    background: #ea580c;
+  }
+</style>
+```
+
+### Promotion Main Section
+
+This component displays promotion details using content collections:
+
+```astro src/components/Promociones/PromoMain.astro
+---
+import { getCollection } from "astro:content";
+import WebTienda from "@/sections/WebTienda.astro";
+import ProcesoEntrega from "@/sections/ProcesoEntrega.astro";
+import promociones from "@/data/promociones.json";
+
+const { idPromo } = Astro.props;
+const promo = promociones.find((promo) => promo.id === idPromo);
+---
+
+<div id="container">
+  {promo ? (
+    <div class="main">
+      <h2 class="promo-title">
+        {promo.titulo.toUpperCase()}
+        <span class="text-orange-400 font-normal">(OFERTA LOW COST)</span>
+      </h2>
+      <ul class="no-bullets">
+        {promo.parrafosMain.map((parrafo) => (
+          <li class="text-slate-500 my-2">{parrafo}</li>
+        ))}
+      </ul>
+      <img
+        src={promo.imagenMain}
+        alt={promo.titulo}
+        width="100%"
+        class="rounded-xl shadow-sm mb-4"
+      />
+    </div>
+  ) : (
+    <p>Promoción no encontrada.</p>
+  )}
+</div>
+
+<ProcesoEntrega tiempoEntrega={promo?.tiempoEntrega} />
+<WebTienda />
+
+<style>
+  .promo-title {
+    font-size: 1.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  
+  .no-bullets li {
+    list-style: none;
+    position: relative;
+    padding-left: 30px;
+    font-size: 1.05rem;
+  }
+  
+  .no-bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,...");
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+</style>
+```
+
+This component:
+1. Fetches promotion data
+2. Displays the promotion details
+3. Composes other sections (ProcesoEntrega, WebTienda)
+4. Includes custom styled list items with checkmark icons
+
+## Component Patterns
+
+### Path Aliases
+
+The project uses `@/` as an alias for `src/`:
+
+```typescript tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
+```
+
+This makes imports cleaner:
+
+```astro
+// ❌ Without alias
+import Layout from "../../../layouts/Layout.astro";
+
+// ✅ With alias
+import Layout from "@/layouts/Layout.astro";
+```
+
+### Props with TypeScript
+
+Components define typed props using TypeScript interfaces:
+
+```astro
+---
+export interface Props {
+  title: string;
+  subtitle?: string;  // Optional
+  items: string[];
+}
+
+const { title, subtitle, items } = Astro.props;
+---
+```
+
+This provides:
+- IntelliSense when using the component
+- Type checking at build time
+- Self-documenting component API
+
+### Slots for Content Projection
+
+The `<slot />` element allows parent components to pass content:
+
+```astro src/components/Card.astro
+---
+const { title } = Astro.props;
+---
+
+<div class="card">
+  <h3>{title}</h3>
+  <slot />  <!-- Content goes here -->
+</div>
+```
+
+Usage:
+
+```astro
+<Card title="My Card">
+  <p>This content is passed through the slot.</p>
+  <button>Click me</button>
+</Card>
+```
+
+### Scoped Styles
+
+Component styles are scoped by default:
+
+```astro
+<div class="card">
+  <h2>Card Title</h2>
+</div>
+
+<style>
+  .card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    /* Only affects h2 inside this component */
+  }
+</style>
+```
+
+Styles don't leak to other components, preventing conflicts.
+
+### Tailwind Utility Classes
+
+Most styling uses Tailwind CSS utilities:
+
+```astro
+<div class="flex items-center gap-4 p-6 bg-white rounded-lg shadow-md">
+  <img src="..." class="w-16 h-16 rounded-full" />
+  <div>
+    <h3 class="text-xl font-bold text-slate-900">Title</h3>
+    <p class="text-slate-600">Description</p>
+  </div>
+</div>
+```
+
+Benefits:
+- Rapid development
+- Consistent design system
+- No CSS bloat
+- Responsive by default
+
+## Component Categories
+
+### Navigation Components
+
+- **NavBar.astro** - Main navigation bar
+- **HeaderLink.astro** - Individual nav links
+- **Breadcrumbs.astro** - Breadcrumb navigation
+- **FlechaAbajo.astro** - Scroll-down arrow
+- **FlechaArriba.astro** - Scroll-up arrow
+
+### Content Display
+
+- **Alert.astro** - Info/warning/success alerts
+- **Autor.astro** - Author bio
+- **BlogSidebar.astro** - Blog post sidebar
+- **AccordionItemSEO.astro** - FAQ accordion
+
+### Forms & Interaction
+
+- **FormMautic.astro** - Marketing form
+- **FormSimple.astro** - Simple contact form
+- **BotonPrecios.astro** - Pricing CTA button
+
+### Marketing Components
+
+- **UrgencyBanner.astro** - Urgency banner at top
+- **TrustBadges.astro** - Trust indicators
+- **GoogleReviews.astro** - Review widget
+- **Estrellas.astro** - Star rating display
+- **CuentaAtras.astro** - Countdown timer
+
+### Legal & Compliance
+
+- **Cookies.astro** - Cookie consent banner
+- **Legal components** - Privacy, terms, GDPR
+
+### Promotional
+
+- **PromoMain.astro** - Main promotion display
+- **PromoLista.astro** - Promotion list
+- **PromoDoble.astro** - Two-column promos
+- **HeroOfertas.astro** - Promotional hero
+- **Caracteristicas.astro** - Feature list
+
+## Best Practices
+
+<Steps>
+
+<Step title="Single Responsibility">
+Each component should do one thing well:
+
+```astro
+// ✅ Good - focused component
+FormattedDate.astro   // Formats dates
+Alert.astro           // Shows alerts
+Icon.astro            // Renders icons
+
+// ❌ Bad - does too much
+Everything.astro      // Handles all UI
+```
+</Step>
+
+<Step title="Composition Over Complexity">
+Compose small components into larger ones:
+
+```astro
+<!-- ✅ Good - composed -->
+<Card>
+  <Icon name="check" />
+  <Title>Success</Title>
+  <Description>Operation completed</Description>
+</Card>
+
+<!-- ❌ Bad - monolithic -->
+<ComplexCard 
+  icon="check" 
+  title="Success" 
+  description="Operation completed"
+  showBorder={true}
+  backgroundColor="white"
+  ... 20 more props
+/>
+```
+</Step>
+
+<Step title="Use TypeScript Interfaces">
+Always define prop types:
+
+```astro
+---
+export interface Props {
+  title: string;
+  items: string[];
+  optional?: boolean;
+}
+
+const { title, items, optional = false } = Astro.props;
+---
+```
+</Step>
+
+<Step title="Scoped Styles When Needed">
+Use scoped styles for component-specific styling:
+
+```astro
+<style>
+  /* Component-specific styles */
+  .special-layout {
+    /* ... */
+  }
+</style>
+```
+
+Use Tailwind for everything else.
+</Step>
+
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+
+<Card title="Content Collections" icon="folder" href="/concepts/content-collections">
+Learn how components consume content data
+</Card>
+
+<Card title="Astro Framework" icon="rocket" href="/concepts/astro-framework">
+Understand how Astro renders components
+</Card>
+
+</CardGroup>

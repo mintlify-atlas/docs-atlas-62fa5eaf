@@ -1,0 +1,403 @@
+---
+title: SEO Configuration
+description: Comprehensive SEO setup including meta tags, Open Graph, and structured data
+---
+
+## Overview
+
+The project implements comprehensive SEO optimization in the main layout component with meta tags, Open Graph data, Twitter Cards, and Schema.org structured data.
+
+## Base Layout SEO
+
+SEO configuration in `src/layouts/Layout.astro`:
+
+```typescript
+// SEO Variables
+const title = Astro.props.title || 
+  "Diseño Web Profesional desde 190€ | Arte y Web Creaciones";
+
+const description = Astro.props.description || 
+  "Diseño web profesional y tiendas online desde 190€. Optimización SEO y presupuesto gratis en 24h. Contacta por WhatsApp.";
+
+const pathname = Astro.url.pathname;
+const cleanPathname = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+const canonical = `https://arteywebcreaciones.com${cleanPathname}`;
+
+const keywords = Astro.props.keywords || 
+  "diseño web profesional, páginas web, tiendas online, desarrollo web, wordpress";
+
+const image = Astro.props.image || 
+  "https://arteywebcreaciones.com/img/hero-imagen.webp";
+
+const robots = Astro.props.robots || 
+  "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+```
+
+## Meta Tags
+
+### Basic Meta Tags
+
+```html
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords} />
+<meta name="author" content="Arte y Web Creaciones" />
+<meta name="publisher" content="Arte y Web Creaciones" />
+<meta name="generator" content={Astro.generator} />
+```
+
+### Canonical URL
+
+```html
+<link rel="canonical" href={canonical} />
+```
+
+<Note>
+Canonical URLs automatically strip trailing slashes for consistency.
+</Note>
+
+### Robots Meta
+
+```html
+<meta name="robots" content={robots} />
+<meta name="x-robots-tag" content={robots} />
+```
+
+**Default robots value:**
+```
+index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1
+```
+
+## Open Graph (Facebook)
+
+```html
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:url" content={canonical} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Arte y Web Creaciones" />
+<meta property="og:locale" content="es_ES" />
+```
+
+**Usage in pages:**
+
+```astro
+---
+const pageTitle = "Servicios de Desarrollo Web";
+const pageDescription = "Creamos páginas web profesionales";
+const pageImage = "https://arteywebcreaciones.com/img/services.jpg";
+---
+
+<Layout 
+  title={pageTitle}
+  description={pageDescription}
+  image={pageImage}
+>
+  <!-- Page content -->
+</Layout>
+```
+
+## Twitter Cards
+
+```html
+<!-- Twitter Card Tags -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+<meta name="twitter:site" content="@arte_y_web" />
+```
+
+**Card Types:**
+- `summary` - Standard card with small image
+- `summary_large_image` - Large image card (currently used)
+- `app` - Mobile app card
+- `player` - Video player card
+
+## Schema.org Structured Data
+
+JSON-LD structured data for local business:
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "Arte y Web Creaciones",
+  "description": "Diseño y desarrollo de páginas web profesionales y tiendas online optimizadas para SEO",
+  "image": "https://arteywebcreaciones.com/img/hero-imagen.webp",
+  "@id": "https://arteywebcreaciones.com",
+  "url": "https://arteywebcreaciones.com",
+  "telephone": "+34722201687",
+  "priceRange": "€€",
+  "areaServed": {
+    "@type": "Country",
+    "name": "España"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Benidorm",
+    "addressRegion": "Alicante",
+    "postalCode": "03503",
+    "addressCountry": "ES"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 38.5411,
+    "longitude": -0.1225
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "10:00",
+    "closes": "18:00"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+34722201687",
+    "contactType": "customer service",
+    "availableLanguage": "Spanish",
+    "contactOption": "TollFree"
+  },
+  "sameAs": [
+    "https://www.facebook.com/arteywebcreaciones",
+    "https://www.instagram.com/arteywebcreaciones",
+    "https://www.linkedin.com/company/arteywebcreaciones"
+  ]
+}
+</script>
+```
+
+## Page-Specific SEO
+
+### Custom Meta Tags
+
+```astro
+---
+// src/pages/servicios.astro
+import Layout from '@/layouts/Layout.astro';
+
+const seoConfig = {
+  title: "Servicios de Diseño Web | Arte y Web Creaciones",
+  description: "Desarrollo web, tiendas online, mantenimiento y SEO. Presupuesto gratis en 24h.",
+  keywords: "servicios web, desarrollo web, tiendas online, mantenimiento web",
+  image: "https://arteywebcreaciones.com/img/servicios-hero.webp",
+};
+---
+
+<Layout {...seoConfig}>
+  <!-- Page content -->
+</Layout>
+```
+
+### Blog Post SEO
+
+```astro
+---
+// src/pages/blog/[...slug].astro
+import { getEntry } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+
+const entry = await getEntry('blog', Astro.params.slug);
+const { Content } = await entry.render();
+
+const seoConfig = {
+  title: `${entry.data.title} | Blog`,
+  description: entry.data.description,
+  image: entry.data.heroImage,
+  keywords: entry.data.tags?.join(', '),
+};
+---
+
+<Layout {...seoConfig}>
+  <article>
+    <h1>{entry.data.title}</h1>
+    <Content />
+  </article>
+</Layout>
+```
+
+## Sitemap Integration
+
+```html
+<link rel="sitemap" href="/sitemap-index.xml" />
+```
+
+See [Sitemap Generation](/configuration/sitemap) for details.
+
+## Favicon
+
+```html
+<link rel="icon" type="image/png" href="/favicon.png" />
+```
+
+Place favicon in `public/favicon.png`.
+
+## Google Fonts Optimization
+
+Preconnect for performance:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
+```
+
+## Analytics Setup
+
+### Google Tag Manager
+
+```html
+<!-- Google Tag Manager -->
+<script src="/gtm.js" defer></script>
+<!-- End Google Tag Manager -->
+```
+
+```html
+<!-- Google Tag Manager (noscript) -->
+<noscript>
+  <iframe
+    src="https://www.googletagmanager.com/ns.html?id=GTM-WCBNV43"
+    height="0"
+    width="0"
+    style="display:none;visibility:hidden"
+  ></iframe>
+</noscript>
+```
+
+## SEO Best Practices
+
+### Title Optimization
+
+```astro
+---
+// Good: Specific, descriptive, includes brand
+const title = "Servicios de Diseño Web Profesional | Arte y Web Creaciones";
+
+// Bad: Generic, too long
+const title = "Servicios";
+---
+```
+
+**Guidelines:**
+- 50-60 characters optimal
+- Include primary keyword
+- Add brand name
+- Unique per page
+
+### Description Optimization
+
+```astro
+---
+// Good: Compelling, includes CTA, 155 characters
+const description = "Diseño web profesional desde 190€. Optimización SEO incluida. Presupuesto gratis en 24h. Contacta por WhatsApp.";
+
+// Bad: Too short, generic
+const description = "Diseño web profesional.";
+---
+```
+
+**Guidelines:**
+- 150-160 characters optimal
+- Include primary keyword
+- Compelling call-to-action
+- Unique per page
+
+### Keyword Strategy
+
+```astro
+---
+const keywords = [
+  "diseño web profesional",
+  "páginas web Benidorm",
+  "tiendas online",
+  "desarrollo web",
+  "wordpress"
+].join(", ");
+---
+```
+
+## Testing SEO
+
+### Google Rich Results Test
+
+```bash
+# Test structured data
+https://search.google.com/test/rich-results
+```
+
+### Open Graph Debugger
+
+```bash
+# Facebook sharing debugger
+https://developers.facebook.com/tools/debug/
+```
+
+### Twitter Card Validator
+
+```bash
+# Test Twitter cards
+https://cards-dev.twitter.com/validator
+```
+
+### Lighthouse SEO Audit
+
+```bash
+npm run build
+npm run preview
+# Run Lighthouse in Chrome DevTools
+```
+
+## Common SEO Issues
+
+### Missing Canonical
+
+```astro
+<!-- Always include canonical -->
+<link rel="canonical" href={canonical} />
+```
+
+### Duplicate Content
+
+```astro
+---
+// Use canonical for duplicate content
+const canonical = "https://arteywebcreaciones.com/original-page";
+---
+```
+
+### Missing Alt Text
+
+```astro
+<!-- Bad -->
+<img src="/image.jpg" />
+
+<!-- Good -->
+<img src="/image.jpg" alt="Descriptive alt text" />
+```
+
+### Slow Page Speed
+
+```astro
+---
+import { Image } from 'astro:assets';
+import hero from '../assets/hero.jpg';
+---
+
+<!-- Use Astro's Image component for optimization -->
+<Image src={hero} alt="Hero" />
+```
+
+## Related Documentation
+
+- [Sitemap Generation](/configuration/sitemap)
+- [URL Redirects](/configuration/redirects)
+- [Astro Configuration](/configuration/astro-config)
+- [Deployment](/configuration/deployment)

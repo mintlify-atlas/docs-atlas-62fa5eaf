@@ -1,0 +1,154 @@
+---
+title: Blog Posts
+description: Create and manage blog post content with the blog collection
+---
+
+# Blog Posts
+
+The blog collection allows you to create and manage blog posts using Markdown or MDX files. Blog posts are stored in `src/content/blog/` and support frontmatter metadata for SEO and organization.
+
+## Schema Definition
+
+The blog collection is defined in `src/content.config.ts:28-45`:
+
+```typescript
+const blog = defineCollection({
+  loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(), // Automatically convert to Date type
+    draft: z.boolean(),
+    tags: z.array(z.string()).optional(),
+    heroImage: z.string().optional(),
+    publisher: z.string().optional(),
+  }),
+});
+```
+
+## Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Main title of the blog post |
+| `description` | `string` | SEO description and preview text |
+| `pubDate` | `date` | Publication date (automatically coerced to Date) |
+| `draft` | `boolean` | If true, post won't be published |
+
+## Optional Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tags` | `string[]` | Array of tags for categorization |
+| `heroImage` | `string` | Path to the hero/featured image |
+| `publisher` | `string` | Name of the publisher/author |
+
+## Example Blog Post
+
+Here's a real example from `src/content/blog/necesito-web.md:1-25`:
+
+```markdown
+---
+title: "Necesito Web"
+description: "¿Por qué tener una página web en la era digital es fundamental?"
+pubDate: '2025-11-01'
+draft: false
+tags: ["webs", "tienda online", "marketing", "dinero"]
+heroImage: "/img/posts/necesito-web.webp"
+slug: "necesito-web"
+---
+
+## Necesito web: ¿Por qué tener una página web en la era digital es fundamental?
+
+En la era digital, tener una página web es esencial. ¿Por qué necesitas una web? 
+Porque es el medio por el cual los clientes potenciales te encuentran, conocen tu 
+negocio y confían en tu marca...
+```
+
+## File Location
+
+Blog posts must be placed in:
+
+```
+src/content/blog/
+├── necesito-web.md
+├── quiero-tienda-online.mdx
+├── mantenimiento-web.md
+└── ... (other blog posts)
+```
+
+## Supported Formats
+
+- **Markdown (`.md`)**: Standard markdown with frontmatter
+- **MDX (`.mdx`)**: Markdown with JSX components for interactive content
+
+## Date Handling
+
+The `pubDate` field uses `z.coerce.date()` which automatically converts string dates to JavaScript Date objects. Supported formats:
+
+```yaml
+pubDate: '2025-11-01'           # ISO format
+pubDate: '2025-11-01T12:00:00'  # ISO with time
+pubDate: 2025-11-01             # Unquoted (will be coerced)
+```
+
+## Creating a New Blog Post
+
+1. Create a new `.md` or `.mdx` file in `src/content/blog/`
+2. Add frontmatter with required fields:
+
+```markdown
+---
+title: "Your Blog Title"
+description: "SEO-friendly description"
+pubDate: '2025-03-05'
+draft: false
+tags: ["web design", "seo"]
+heroImage: "/img/posts/your-image.webp"
+---
+
+## Your Content Here
+
+Write your blog post content using Markdown or MDX...
+```
+
+3. Save and the blog post will be automatically loaded by Astro's content loader
+
+## Querying Blog Posts
+
+Use Astro's content collections API to query blog posts:
+
+```typescript
+import { getCollection } from 'astro:content';
+
+// Get all published blog posts
+const posts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Sort by date
+const sortedPosts = posts.sort((a, b) => 
+  b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+```
+
+## SEO Best Practices
+
+- **Title**: Keep under 60 characters for optimal search result display
+- **Description**: 150-160 characters for complete display in search results
+- **Tags**: Use 3-5 relevant tags for better categorization
+- **Hero Image**: Use WebP format for optimal performance (as shown in examples)
+- **Slug**: Create descriptive, keyword-rich URLs
+
+## Draft Posts
+
+Set `draft: true` to hide posts from production:
+
+```yaml
+---
+title: "Work in Progress"
+draft: true
+---
+```
+
+Draft posts can be filtered out during collection queries to prevent them from appearing on the live site.

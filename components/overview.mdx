@@ -1,0 +1,171 @@
+---
+title: 'Components Overview'
+description: 'Overview of Arte y Web Creaciones Astro components'
+icon: 'puzzle-piece'
+---
+
+## Introduction
+
+Arte y Web Creaciones uses a collection of custom Astro components to build professional, conversion-optimized websites. All components are built with Astro's component syntax and follow modern web development best practices.
+
+## Component Architecture
+
+The component library is organized into several categories:
+
+### Layout Components
+- **NavBar** - Responsive navigation with dropdown menus
+- **Footer** - Site footer with social links and legal information
+- **BaseHead** - HTML head meta tags and SEO configuration
+
+### Hero & Promotional Components
+- **HeroOfertas** - Hero section for promotional offers
+- **Welcome** - Welcome/landing hero component
+- **UrgencyBanner** - Time-sensitive promotional banners
+
+### Form Components
+- **FormMautic** - Advanced Mautic CRM integration with spam protection
+- **FormSimple** - Simple Netlify-powered contact form
+
+### Social Proof Components
+- **GoogleReviews** - Google reviews carousel with testimonials
+- **TrustBadges** - Trust indicators and security badges
+- **Estrellas** - Star rating display
+
+### Interactive Components
+- **CuentaAtras** - Countdown timer for promotions
+- **WhatsappBoton** - WhatsApp contact button
+- **WhatsappFijo** - Fixed WhatsApp widget
+- **FlechaArriba** - Scroll-to-top button
+
+### Content Components
+- **Breadcrumbs** - Breadcrumb navigation
+- **AccordionItemSEO** - SEO-optimized accordion/FAQ
+- **BlogSidebar** - Blog sidebar with navigation
+- **Autor** - Author bio component
+
+## Technology Stack
+
+<CardGroup cols={2}>
+  <Card title="Astro Components" icon="rocket">
+    Server-side rendered components with minimal client JavaScript
+  </Card>
+  <Card title="TypeScript" icon="code">
+    Type-safe props and interfaces for better developer experience
+  </Card>
+  <Card title="CSS Modules" icon="palette">
+    Scoped styles with CSS variables for theming
+  </Card>
+  <Card title="Icon Integration" icon="icons">
+    Using astro-icon for Material Design Icons
+  </Card>
+</CardGroup>
+
+## Design Principles
+
+### Performance First
+All components are optimized for fast loading times with:
+- Lazy loading for images and heavy content
+- Minimal JavaScript footprint
+- Server-side rendering by default
+
+### Mobile Responsive
+Every component includes responsive breakpoints:
+- Mobile-first approach
+- Flexible layouts using CSS Grid and Flexbox
+- Touch-optimized interactions
+
+### Conversion Optimized
+Components are designed to drive user actions:
+- Clear call-to-action buttons
+- Social proof elements
+- Trust indicators
+- Urgency elements
+
+### Accessibility
+Built with web accessibility standards:
+- Semantic HTML
+- ARIA labels where needed
+- Keyboard navigation support
+- Screen reader friendly
+
+## Component Usage Patterns
+
+### Standard Import
+
+```astro
+---
+import ComponentName from '@/components/ComponentName.astro';
+---
+
+<ComponentName prop="value" />
+```
+
+### With Props Interface
+
+```astro
+---
+import type { Props } from '@/components/ComponentName.astro';
+
+const props: Props = {
+  formId: 123,
+  city: "Benidorm"
+};
+---
+
+<ComponentName {...props} />
+```
+
+### Composing Components
+
+```astro
+---
+import NavBar from '@/components/NavBar.astro';
+import Footer from '@/components/Footer.astro';
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+---
+
+<NavBar />
+<main>
+  <HeroOfertas idPromo="web-onepage" />
+  <!-- Page content -->
+</main>
+<Footer />
+```
+
+## Data Integration
+
+Many components integrate with JSON data sources:
+
+- `menu.json` - Navigation menu structure
+- `promociones.json` - Promotional offers data
+- `google-reviews.json` - Customer reviews
+- `testimonios.json` - Client testimonials
+
+## Styling System
+
+Components use a centralized CSS variable system:
+
+```css
+--bg-ofertas: Background color for offers
+--color-ofertas: Text color for offers
+--precio-destacado: Highlighted price color
+--container-width-desktop: Max width for desktop layouts
+--text-sm: Small text size
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Hero Components" icon="star" href="/components/hero">
+    Learn about hero and promotional components
+  </Card>
+  <Card title="Form Components" icon="envelope" href="/components/forms">
+    Implement contact and lead generation forms
+  </Card>
+  <Card title="Navigation" icon="bars" href="/components/navigation">
+    Set up site navigation and menus
+  </Card>
+  <Card title="Testimonials" icon="comments" href="/components/testimonials">
+    Display social proof and reviews
+  </Card>
+</CardGroup>

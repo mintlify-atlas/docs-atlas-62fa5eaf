@@ -1,0 +1,287 @@
+---
+title: Deployment Configuration
+description: Deploy Arte y Web Creaciones site to Netlify with optimized settings
+---
+
+## Overview
+
+The project is configured for deployment on Netlify using the `netlify.toml` configuration file. This setup includes build settings, environment variables, and complex redirect rules.
+
+## Netlify Configuration
+
+### Build Settings
+
+```toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20.x"
+```
+
+**Configuration:**
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| `command` | `npm run build` | Astro build command |
+| `publish` | `dist` | Output directory |
+| `NODE_VERSION` | `20.x` | Node.js version |
+
+## Redirect Rules
+
+### WWW to Non-WWW
+
+Force canonical domain without www:
+
+```toml
+[[redirects]]
+  from = "https://www.arteywebcreaciones.com/*"
+  to = "https://arteywebcreaciones.com/:splat"
+  status = 301
+  force = true
+```
+
+<Note>
+The `force = true` flag ensures this redirect takes precedence over other rules.
+</Note>
+
+### Content Redirects
+
+Redirect old URLs to new blog structure:
+
+```toml
+[[redirects]]
+  from = "/que-es-el-dropshipping"
+  to = "/blog/que-es-el-dropshipping"
+  status = 301
+
+[[redirects]]
+  from = "/cuantos-tipos-de-web-existen"
+  to = "/blog/cuantos-tipos-de-web-existen"
+  status = 301
+```
+
+### Wildcard Redirects
+
+Handle multiple URLs with patterns:
+
+```toml
+[[redirects]]
+  from = "/how-much-does-a-website-cost/*"
+  to = "/blog/cuanto-cuesta-una-pagina-web"
+  status = 301
+
+[[redirects]]
+  from = "/promocion/*"
+  to = "/promociones/:splat"
+  status = 301
+```
+
+**Splat operator (`:splat`)** captures the rest of the path.
+
+### 404 Handling
+
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+```
+
+<Warning>
+This rule must be last in the redirect list. It catches all unmatched URLs.
+</Warning>
+
+## Complete Redirect List
+
+The project includes 20+ redirect rules:
+
+1. WWW normalization
+2. Blog URL migrations
+3. Section reorganizations
+4. Language redirects
+5. Old promotion pages
+6. Legacy service URLs
+
+## Deployment Process
+
+### Initial Setup
+
+1. **Connect Repository:**
+   - Log in to Netlify
+   - Click "New site from Git"
+   - Select your repository
+
+2. **Configure Build:**
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+   - Node version: 20.x (from netlify.toml)
+
+3. **Deploy:**
+   - Click "Deploy site"
+   - Netlify reads `netlify.toml` automatically
+
+### Continuous Deployment
+
+Netlify automatically deploys on:
+- Push to main branch
+- Pull request previews
+- Manual deploys from dashboard
+
+## Environment Variables
+
+Set in Netlify dashboard under **Site settings > Environment variables**:
+
+```bash
+PUBLIC_SITE_URL=https://arteywebcreaciones.com
+# Add other variables as needed
+```
+
+<Note>
+Variables prefixed with `PUBLIC_` are exposed to the browser.
+</Note>
+
+## Build Optimization
+
+### Build Performance
+
+```toml
+[build.environment]
+  NODE_VERSION = "20.x"
+  NPM_FLAGS = "--force"
+```
+
+### Caching
+
+Netlify automatically caches:
+- `node_modules/`
+- Astro build cache
+- npm/yarn cache
+
+## Deploy Previews
+
+Every pull request gets a preview URL:
+
+```
+https://deploy-preview-123--arteywebcreaciones.netlify.app
+```
+
+**Features:**
+- Full site preview
+- All redirects active
+- Isolated from production
+
+## Custom Domain
+
+### DNS Configuration
+
+**CNAME Record:**
+```
+arteywebcreaciones.com -> your-site.netlify.app
+```
+
+**A Records (alternative):**
+```
+75.2.60.5
+99.83.190.102
+```
+
+### SSL Certificate
+
+Netlify provides free SSL via Let's Encrypt:
+- Auto-renewal
+- HTTPS forced by default
+- Certificate visible in dashboard
+
+## Performance Features
+
+### Edge Network
+
+- Global CDN
+- Automatic asset optimization
+- Brotli compression
+
+### Image Optimization
+
+Astro's built-in image optimization works with Netlify:
+
+```astro
+import { Image } from 'astro:assets';
+import hero from '../assets/hero.jpg';
+
+<Image src={hero} alt="Hero" />
+```
+
+## Monitoring
+
+### Build Logs
+
+Access in Netlify dashboard:
+- Build time
+- Deploy duration
+- Error messages
+
+### Analytics
+
+Enable Netlify Analytics:
+- Server-side tracking
+- No cookies required
+- GDPR compliant
+
+## Troubleshooting
+
+### Build Fails
+
+1. Check Node version matches `netlify.toml`
+2. Verify all dependencies in `package.json`
+3. Review build logs in dashboard
+
+### Redirects Not Working
+
+1. Verify `netlify.toml` syntax
+2. Check redirect order (specific before general)
+3. Test with curl:
+
+```bash
+curl -I https://arteywebcreaciones.com/old-url
+```
+
+### 404 Errors
+
+1. Ensure `404.html` exists in `dist/`
+2. Check catch-all redirect is last
+3. Verify file paths are correct
+
+## Alternative Deployment
+
+### Vercel
+
+Install adapter:
+
+```bash
+npm install @astrojs/vercel
+```
+
+```javascript
+// astro.config.mjs
+import vercel from '@astrojs/vercel/static';
+
+export default defineConfig({
+  output: 'static',
+  adapter: vercel(),
+});
+```
+
+### Cloudflare Pages
+
+```bash
+npm run build
+npx wrangler pages deploy dist
+```
+
+## Related Documentation
+
+- [Astro Configuration](/configuration/astro-config)
+- [URL Redirects](/configuration/redirects)
+- [SEO Setup](/configuration/seo-setup)

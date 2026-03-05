@@ -1,0 +1,137 @@
+---
+title: Astro Configuration
+description: Complete guide to Astro configuration for Arte y Web Creaciones project
+---
+
+## Overview
+
+The main Astro configuration is located in `astro.config.mjs` at the project root. This file defines the site settings, integrations, and build configuration.
+
+## Configuration File
+
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+
+import sitemap from '@astrojs/sitemap';
+import tailwind from '@astrojs/tailwind';
+import mdx from '@astrojs/mdx';
+import icon from 'astro-icon';
+
+export default defineConfig({
+  site: 'https://arteywebcreaciones.com',
+  server: {
+    port: 4322,
+  },
+  redirects: {
+    '/compras/comprar-web-single': '/compras/comprar-web-onepage',
+    '/comprar-web-single': '/compras/comprar-web-onepage',
+    '/blog/cuanto-cuesta-crear-una-pagina-web': '/blog/cuanto-cuesta-una-pagina-web',
+    '/blog/cuanto-cuesta-crear-una-pagina-web/': '/blog/cuanto-cuesta-una-pagina-web/'
+  },
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes('/recibido-ok') && !page.includes('/presupuesto'),
+    }), 
+    tailwind(), 
+    mdx(), 
+    icon({
+      include: {
+        mdi: ['*'],
+      },
+    })
+  ],
+  vite: {
+    css: {},
+  },
+});
+```
+
+## Key Settings
+
+### Site Configuration
+
+<CodeGroup>
+```javascript Site URL
+site: 'https://arteywebcreaciones.com'
+```
+</CodeGroup>
+
+The `site` property defines the production URL. This is required for:
+- Generating absolute URLs in sitemaps
+- Creating canonical URLs
+- Social media meta tags
+
+### Development Server
+
+<CodeGroup>
+```javascript Server Port
+server: {
+  port: 4322,
+}
+```
+</CodeGroup>
+
+Custom development server port to avoid conflicts with other services.
+
+**Usage:**
+```bash
+npm run dev
+# Server runs on http://localhost:4322
+```
+
+### Redirects
+
+Simple redirects are defined directly in the Astro config:
+
+```javascript
+redirects: {
+  '/compras/comprar-web-single': '/compras/comprar-web-onepage',
+  '/comprar-web-single': '/compras/comprar-web-onepage',
+  '/blog/cuanto-cuesta-crear-una-pagina-web': '/blog/cuanto-cuesta-una-pagina-web',
+}
+```
+
+<Note>
+These are 301 (permanent) redirects. For more complex redirect rules, see [URL Redirects](/configuration/redirects).
+</Note>
+
+### Integrations
+
+The project uses four official and community integrations:
+
+1. **@astrojs/sitemap** - Automatic sitemap generation
+2. **@astrojs/tailwind** - Tailwind CSS support
+3. **@astrojs/mdx** - MDX content support
+4. **astro-icon** - Icon system
+
+See individual integration pages for detailed configuration.
+
+## Build Output
+
+Astro builds static HTML by default. Output directory:
+
+```bash
+dist/
+```
+
+## Environment Variables
+
+Create a `.env` file for environment-specific settings:
+
+```bash
+# .env
+PUBLIC_SITE_URL=https://arteywebcreaciones.com
+```
+
+<Warning>
+Never commit `.env` files with sensitive data. Use `.env.example` for documentation.
+</Warning>
+
+## Related Documentation
+
+- [Tailwind Integration](/configuration/tailwind)
+- [MDX Integration](/configuration/mdx)
+- [Icon Setup](/configuration/icons)
+- [Sitemap Generation](/configuration/sitemap)
+- [URL Redirects](/configuration/redirects)

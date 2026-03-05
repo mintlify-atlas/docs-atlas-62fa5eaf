@@ -1,0 +1,236 @@
+---
+title: Promotional Content
+description: Manage promotional content collections (promoSingle, promoPro, promoTienda)
+---
+
+# Promotional Content
+
+Arte y Web Creaciones uses three promotional content collections to showcase different web service offerings. These collections share a common schema and support multiple content formats.
+
+## Collections Overview
+
+- **`promoSingle`**: Single-page website promotions
+- **`promoPro`**: Professional website promotions  
+- **`promoTienda`**: Online store/e-commerce promotions
+
+## Shared Schema
+
+All promotional collections use the same schema defined in `src/content.config.ts:14-26`:
+
+```typescript
+const promoSchema = z.object({
+  titulo: z.string(),              // Main title
+  subtitulo: z.string(),           // Subtitle
+  precio: z.string(),              // Price (as text, includes symbols like €)
+  destacado: z.string(),           // Highlighted price/feature
+  backgroundImage: z.string(),     // Background image path
+  detalles: z.array(z.string()),   // Array of feature details
+  link: z.string(),                // URL link
+  tituloMain: z.string(),          // Main section title
+  parrafosMain: z.array(z.string()), // Array of main paragraphs
+  imagenMain: z.string(),          // Main image path
+  detallesSideBar: detallesSideBarSchema, // Sidebar details (see below)
+});
+```
+
+## Sidebar Details Schema
+
+The `detallesSideBar` field uses a nested schema defined in `src/content.config.ts:5-11`:
+
+```typescript
+const detallesSideBarSchema = z.array(
+  z.object({
+    icono: z.string(),    // Icon string (e.g., CSS icon classes)
+    titulo: z.string(),   // Detail title
+    contenido: z.string() // Detail content
+  })
+);
+```
+
+## Collection Definitions
+
+Defined in `src/content.config.ts:48-62`:
+
+```typescript
+export const collections = {
+  promoSingle: defineCollection({
+    loader: glob({ base: './src/content/promoSingle', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+  promoPro: defineCollection({
+    loader: glob({ base: './src/content/promoPro', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+  promoTienda: defineCollection({
+    loader: glob({ base: './src/content/promoTienda', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+  blog,
+};
+```
+
+## Example: promoSingle
+
+Real example from `src/content/promoSingle/promoSingle.md`:
+
+```yaml
+---
+titulo: "Web SINGLEPAGE Completa"
+subtitulo: "Una web veloz en 7 días"
+precio: "190.00"
+destacado: "IVA no incluido"
+backgroundImage: "/img/ofertas/web-onepage-en-oferta.webp"
+detalles:
+  - "Una página responsive"
+  - "5 secciones en menú"
+  - "Rápida y sin recargas"
+  - "Hecha por profesionales"
+  - "Certificado SSL"
+  - "Optimizada para SEO"
+  - "Puede crecer en el tiempo"
+link: "/promocion/web-onepage-en-oferta/"
+tituloMain: "Detalles de la Web SinglePage"
+parrafosMain:
+  - "La Página Web Profesional One Page (1 página) en menú es una excelente opción..."
+  - "Tiene todo lo que necesita una web para darse a conocer al público..."
+  - "Está preparada para posicionarse orgánicamente en Google (SEO)."
+imagenMain: "/img/ofertas/promo-single-page.webp"
+detallesSideBar:
+  - icono: "bi bi-heart"
+    titulo: "La web es de tu propiedad"
+    contenido: "La creación de tu sitio web será completamente tuya..."
+  - icono: "bi bi-lightning"
+    titulo: "Acceso inmediato"
+    contenido: "Una vez elijas plantilla y nos entregues imagenes y textos: entrega 7 días"
+  - icono: "bi bi-menu-button-wide"
+    titulo: "Menú completo de 5 secciones"
+    contenido: "Menú con todo el contenido cargado de forma instantánea..."
+  - icono: "bi bi-emoji-smile"
+    titulo: "Garantía de satisfacción"
+    contenido: "Nos comprometemos a trabajar contigo para entregar una web..."
+---
+```
+
+## Directory Structure
+
+```
+src/content/
+├── promoSingle/
+│   └── promoSingle.md
+├── promoPro/
+│   └── (promotional files)
+└── promoTienda/
+    └── (promotional files)
+```
+
+## Supported Formats
+
+All promotional collections support:
+- **Markdown** (`.md`)
+- **MDX** (`.mdx`)  
+- **JSON** (`.json`)
+
+## JSON Format Example
+
+From `src/data/promociones.json`, showing a tienda online promotion:
+
+```json
+{
+  "id": "3",
+  "titulo": "Tienda Online",
+  "subtitulo": "Tienda START en 30 días",
+  "destacado": "IVA no incluido",
+  "precio": "500",
+  "backgroundImage": "/img/ofertas/tienda-online-en-oferta.webp",
+  "tiempoEntrega": "aprox. 30 días",
+  "detalles": [
+    "Optimizada para SEO",
+    "Pasarela de pagos: Paypal, Stripe",
+    "Visa, Master Card. Transferencias",
+    "Certificado seguridad SSL",
+    "Incluye 1 año Hosting Gratis"
+  ],
+  "link": "/promociones/tienda-online-en-oferta/",
+  "tituloMain": "Detalles de la Tienda Online Completa",
+  "parrafosMain": [
+    "Lanza tu Negocio al Mundo Digital Rápidamente...",
+    "Crecimiento Gradual y Costes Reducidos..."
+  ],
+  "imagenMain": "/img/ofertas/tienda-online-en-oferta.webp",
+  "detallesSideBar": [
+    {
+      "icono": "heart",
+      "titulo": "Tienda de su propiedad",
+      "contenido": "La creación de tu sitio web será completamente tuya..."
+    }
+  ]
+}
+```
+
+## Creating New Promotions
+
+1. Choose the appropriate collection directory
+2. Create a new file with supported extension (`.md`, `.mdx`, or `.json`)
+3. Include all required schema fields
+4. Follow the pricing format: string with symbols (e.g., "190.00" or "500")
+
+### Markdown Format
+
+```markdown
+---
+titulo: "Your Promo Title"
+subtitulo: "Catchy subtitle"
+precio: "350.00"
+destacado: "IVA no incluido"
+backgroundImage: "/img/your-bg.webp"
+detalles:
+  - "Feature 1"
+  - "Feature 2"
+link: "/your-promo-link/"
+tituloMain: "Main Section Title"
+parrafosMain:
+  - "Paragraph 1"
+  - "Paragraph 2"
+imagenMain: "/img/your-main.webp"
+detallesSideBar:
+  - icono: "icon-class"
+    titulo: "Sidebar Title"
+    contenido: "Sidebar content"
+---
+```
+
+## Querying Promotional Collections
+
+```typescript
+import { getCollection } from 'astro:content';
+
+// Get all single-page promotions
+const singlePromos = await getCollection('promoSingle');
+
+// Get all professional promotions
+const proPromos = await getCollection('promoPro');
+
+// Get all store promotions
+const storePromos = await getCollection('promoTienda');
+```
+
+## Icon Classes
+
+The `icono` field in `detallesSideBar` uses icon class strings. Common patterns:
+
+- Bootstrap Icons: `"bi bi-heart"`, `"bi bi-lightning"`
+- Simple names: `"heart"`, `"ray"`, `"menu2"`, `"smile"`
+
+Ensure your icon library supports the class format you're using.
+
+## Price Formatting
+
+Prices are stored as strings to preserve formatting:
+
+```yaml
+precio: "190.00"   # Keeps decimal places
+precio: "500"      # Integer format
+precio: "450€"     # Can include currency symbol
+```
+
+This allows flexibility in display without numeric constraints.

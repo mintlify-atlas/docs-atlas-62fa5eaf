@@ -1,0 +1,485 @@
+---
+title: Process Delivery Section
+description: ProcesoEntrega component displaying the work process with interactive accordions
+---
+
+# ProcesoEntrega Section
+
+The `ProcesoEntrega` component displays the website creation process as an interactive accordion-based timeline. It combines visual flow indicators with expandable content sections to guide users through the delivery process.
+
+## Component Location
+
+**File**: `src/sections/ProcesoEntrega.astro`
+
+## Data Source
+
+Process steps are loaded from `src/data/procesoentrega.json`, which contains an array of process steps with titles and HTML body content.
+
+## Component Overview
+
+From `src/sections/ProcesoEntrega.astro:1-25`:
+
+```astro
+---
+import { Accordion } from "free-astro-components";
+import AccordionItemSEO from "@/components/AccordionItemSEO.astro";
+import procesoEntrega from "@/data/procesoentrega.json";
+import { Icon } from "astro-icon/components";
+
+const meses = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+const mesActual = meses[new Date().getMonth()];
+const { tiempoEntrega = "7 días" } = Astro.props;
+---
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tiempoEntrega` | `string` | `"7 días"` | Delivery timeframe displayed in the title |
+
+## Usage
+
+### Default (7 días)
+
+```astro
+---
+import ProcesoEntrega from '@/sections/ProcesoEntrega.astro';
+---
+
+<ProcesoEntrega />
+```
+
+### Custom Delivery Time
+
+```astro
+<ProcesoEntrega tiempoEntrega="15 días" />
+```
+
+## Section Structure
+
+The component consists of:
+
+1. **Payment highlight banner** - Displays discount and payment info
+2. **Section title** - Shows delivery timeframe
+3. **Process steps** - Interactive accordion timeline
+
+### Payment Highlight Banner
+
+From `src/sections/ProcesoEntrega.astro:28-39`:
+
+```astro
+<div class="payment-highlight">
+  <p class="discount-text">
+    <Icon name="mdi:tag-outline" class="discount-icon" />
+    <strong>20% de DESCUENTO aplicado automáticamente</strong> | Oferta
+    {mesActual}: Últimas 3 plazas.
+  </p>
+  <p class="payment-details">
+    Pago único al inicio para asegurar tu plaza y comenzar inmediatamente.
+    <strong>Sin pagos mensuales, sin sorpresas.</strong>
+  </p>
+</div>
+```
+
+**Features:**
+- Dynamic current month display (`mesActual`)
+- 20% discount messaging with urgency ("Últimas 3 plazas")
+- Single payment clarification
+- Icon from `astro-icon` (Material Design Icons)
+
+### Section Title
+
+From `src/sections/ProcesoEntrega.astro:41-46`:
+
+```astro
+<div class="titulo_bloque">
+  <h2>
+    Cómo trabajamos: Proceso de entrega en <span>{tiempoEntrega}</span>
+  </h2>
+  <h3>Pasos para crear tu web</h3>
+</div>
+```
+
+## Process Steps Structure
+
+Each step combines:
+
+1. **Visual flow** - Numbered balloon indicator with connecting lines
+2. **Accordion content** - Expandable step details
+
+From `src/sections/ProcesoEntrega.astro:47-75`:
+
+```astro
+<div class="steps-container">
+  {procesoEntrega.map((item, index) => (
+    <div class="step-row" data-step={index}>
+      <div class="visual-flow">
+        <div
+          class={`flow-balloon ${index === 0 ? "active" : ""}`}
+          data-index={index}
+        >
+          <span>{index + 1}</span>
+        </div>
+        {index < procesoEntrega.length - 1 && (
+          <div class="flow-line-segment" />
+        )}
+      </div>
+      <div class="step-content">
+        <AccordionItemSEO
+          title={item.title}
+          class="step-accordion"
+          data-index={index}
+          open={index === 0}
+        >
+          <p class="ptexto" set:html={item.body} />
+        </AccordionItemSEO>
+      </div>
+    </div>
+  ))}
+</div>
+```
+
+### Key Features
+
+- **Numbered balloons**: Display step numbers (1, 2, 3...)
+- **Connecting lines**: Visual flow between steps
+- **First step open**: `open={index === 0}` opens the first accordion by default
+- **HTML content**: Uses `set:html` to render HTML from JSON
+- **Click sync**: Balloons and accordions are synchronized via JavaScript
+
+## Interactive Behavior
+
+JavaScript handles accordion-balloon synchronization (from line 77-126):
+
+### Balloon Click Handler
+
+```javascript
+balloons.forEach((balloon) => {
+  balloon.addEventListener("click", (e) => {
+    const index = balloon.getAttribute("data-index");
+    const summary = document.querySelector(
+      `.step-row[data-step="${index}"] summary`,
+    ) as HTMLElement;
+
+    if (summary) {
+      summary.click();
+    }
+  });
+});
+```
+
+### Accordion Toggle Handler
+
+```javascript
+document
+  .querySelectorAll(".step-row details")
+  .forEach((details, idx) => {
+    details.addEventListener("toggle", () => {
+      const balloon = document.querySelector(
+        `.flow-balloon[data-index="${idx}"]`,
+      );
+      if (balloon) {
+        if ((details as HTMLDetailsElement).open) {
+          balloon.classList.add("active");
+
+          // Close other accordions (exclusive behavior)
+          document
+            .querySelectorAll(".step-row details")
+            .forEach((otherDetails) => {
+              if (
+                otherDetails !== details &&
+                (otherDetails as HTMLDetailsElement).open
+              ) {
+                (otherDetails as HTMLDetailsElement).open = false;
+              }
+            });
+        } else {
+          balloon.classList.remove("active");
+        }
+      }
+    });
+  });
+```
+
+**Behavior:**
+- Clicking a balloon opens its accordion
+- Opening an accordion highlights its balloon
+- Only one accordion can be open at a time (exclusive)
+
+## Data Structure
+
+From `src/data/procesoentrega.json`:
+
+```json
+[
+  {
+    "title": "Diagnóstico Inicial y Estrategia",
+    "body": "Todo gran proyecto comienza con una buena charla. Nos pondremos en contacto contigo para entender a fondo tu empresa, sector y objetivos. En esta fase definimos juntos la identidad de tu web: colores corporativos, logotipo y la actividad clave que quieres potenciar. Si aún no tienes claro qué necesitas, te aconsejamos sobre <a href='/blog/necesito-web/'>por qué una web profesional es tu mejor comercial 24/7</a>."
+  },
+  {
+    "title": "Propuestas de Diseño Personalizadas",
+    "body": "No usamos plantillas genéricas. En pocos días te presentamos un par de propuestas visuales diseñadas exclusivamente para tu negocio. Buscamos el equilibrio perfecto entre estética y conversión, aplicando <a href='/blog/cta-call-to-action-convertir-visitas-clientes/'>estratégias de Call to Action</a> para que tus visitas se conviertan en clientes reales."
+  }
+]
+```
+
+**Note**: The `body` field contains HTML with internal links to blog posts for SEO.
+
+## Styling Overview
+
+### Container and Background
+
+From `src/sections/ProcesoEntrega.astro:132-146`:
+
+```css
+.proceso-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.soft-bg {
+  background-color: #d2ddea; /* slate-300 */
+  padding: 4rem 0;
+  border-top: 1px solid #94a3b8;
+  border-bottom: 1px solid #94a3b8;
+}
+```
+
+### Payment Highlight Styles
+
+From `src/sections/ProcesoEntrega.astro:148-184`:
+
+```css
+.payment-highlight {
+  background-color: #ffffff;
+  border-left: 4px solid #0284c7;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.05);
+  border: 1px solid rgba(2, 132, 199, 0.1);
+}
+
+.discount-text {
+  color: #0369a1;
+  font-size: 1.125rem;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+```
+
+### Flow Balloon Styles
+
+From `src/sections/ProcesoEntrega.astro:245-276`:
+
+```css
+.flow-balloon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background-color: white;
+  border: 2px solid rgba(2, 132, 199, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: rgba(2, 132, 199, 0.4);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  background-color: #f8fafc;
+}
+
+.flow-balloon:hover {
+  transform: scale(1.1);
+  border-color: #0284c7;
+  color: #0284c7;
+  background-color: white;
+}
+
+.flow-balloon.active {
+  background-color: #0284c7;
+  border-color: #0284c7;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+}
+```
+
+**States:**
+- **Default**: Light background, subtle border
+- **Hover**: Scales up, darker border
+- **Active**: Blue background, white text, glowing shadow
+
+### Grid Layout
+
+From `src/sections/ProcesoEntrega.astro:229-235`:
+
+```css
+.step-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 1.5rem;
+  align-items: flex-start;
+  position: relative;
+}
+```
+
+This creates a two-column layout:
+- **Column 1** (60px): Visual flow (balloons + lines)
+- **Column 2** (1fr): Accordion content
+
+## SEO Features
+
+### Internal Links
+
+The component includes SEO-friendly internal links in step content:
+
+```css
+.ptexto :global(a) {
+  color: #0284c7;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.ptexto :global(a:hover) {
+  color: #0369a1;
+}
+```
+
+Example link from data:
+```html
+<a href='/blog/necesito-web/'>por qué una web profesional es tu mejor comercial 24/7</a>
+```
+
+## Responsive Design
+
+Mobile styles from `src/sections/ProcesoEntrega.astro:324-334`:
+
+```css
+@media (max-width: 768px) {
+  .step-row {
+    grid-template-columns: 50px 1fr;
+    gap: 1rem;
+  }
+  .flow-balloon {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+}
+```
+
+**Mobile changes:**
+- Narrower visual flow column (50px)
+- Smaller balloons (36px)
+- Reduced font size
+
+## Dependencies
+
+### External Packages
+
+```astro
+import { Accordion } from "free-astro-components";
+import { Icon } from "astro-icon/components";
+```
+
+- **free-astro-components**: Provides accordion functionality
+- **astro-icon**: Material Design Icons support
+
+### Internal Components
+
+```astro
+import AccordionItemSEO from "@/components/AccordionItemSEO.astro";
+```
+
+Custom accordion component with SEO optimizations.
+
+## Example: Adding to a Page
+
+```astro
+---
+import Layout from '@/layouts/Layout.astro';
+import ProcesoEntrega from '@/sections/ProcesoEntrega.astro';
+---
+
+<Layout 
+  title="Nuestro Proceso | Arte y Web Creaciones"
+  description="Descubre nuestro proceso de entrega en 6 pasos"
+>
+  <main>
+    <ProcesoEntrega tiempoEntrega="10 días" />
+  </main>
+</Layout>
+```
+
+## Customization
+
+### Change Delivery Time
+
+Pass different `tiempoEntrega` prop:
+
+```astro
+<ProcesoEntrega tiempoEntrega="15 días" />
+<ProcesoEntrega tiempoEntrega="30 días" />
+<ProcesoEntrega tiempoEntrega="7-10 días" />
+```
+
+### Update Discount Offer
+
+Edit line 32-33 in the component:
+
+```astro
+<strong>20% de DESCUENTO aplicado automáticamente</strong> | Oferta
+{mesActual}: Últimas 3 plazas.
+```
+
+### Add/Remove Process Steps
+
+Edit `src/data/procesoentrega.json`:
+
+```json
+[
+  {
+    "title": "New Step Title",
+    "body": "Step description with <a href='/link/'>links</a>."
+  }
+]
+```
+
+The component automatically adjusts to the number of steps.
+
+## Best Practices
+
+1. **Keep steps concise**: 4-6 steps work best visually
+2. **Use internal links**: Include blog links in step content for SEO
+3. **Update monthly**: Change the urgency message regularly
+4. **Mobile test**: Verify balloon tap targets on mobile
+5. **Descriptive titles**: Make step titles clear and action-oriented
+6. **HTML content**: Use basic HTML tags in body content (strong, a, em)
+
+## Accessibility
+
+- Semantic HTML structure
+- Keyboard navigation via native `<details>` elements
+- Clickable balloon indicators
+- Clear visual states (hover, active)
+- ARIA attributes handled by accordion component
+
+## Performance
+
+- Lightweight JavaScript (event listeners only)
+- CSS transitions (no heavy animations)
+- Lazy-loaded icons
+- Efficient DOM queries (no jQuery)

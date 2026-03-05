@@ -1,0 +1,250 @@
+---
+title: 'Hero Components'
+description: 'Hero and promotional banner components for landing pages'
+icon: 'star'
+---
+
+## Overview
+
+Hero components are designed to create impactful first impressions on landing pages and promotional pages. They combine imagery, headlines, pricing, and call-to-action elements.
+
+## HeroOfertas
+
+The primary hero component for promotional offer pages. It displays a promotional offer with an image, title, subtitle, pricing, and feature list.
+
+### Props
+
+<ParamField path="idPromo" type="string" required>
+  The unique identifier for the promotion. Must match an entry in `@/data/promociones.json`.
+</ParamField>
+
+### Data Structure
+
+The component fetches data from `promociones.json` based on the `idPromo` prop. The expected data structure:
+
+```json
+{
+  "id": "web-onepage",
+  "titulo": "WEB ECONÓMICA",
+  "subtitulo": "Perfecta para empezar",
+  "precio": "299",
+  "destacado": "Oferta especial",
+  "backgroundImage": "/img/promos/singlepage-04.webp",
+  "detalles": [
+    "Diseño profesional",
+    "Responsive design",
+    "Optimización SEO",
+    "Formulario de contacto"
+  ]
+}
+```
+
+### Usage
+
+<CodeGroup>
+```astro Basic Usage
+---
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+---
+
+<HeroOfertas idPromo="web-onepage" />
+```
+
+```astro Multiple Offers Page
+---
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+import promos from '@/data/promociones.json';
+---
+
+{promos.map(promo => (
+  <HeroOfertas idPromo={promo.id} />
+))}
+```
+
+```astro Conditional Display
+---
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+
+const { offerType } = Astro.params;
+const promoId = offerType === 'basic' ? 'web-onepage' : 'web-profesional';
+---
+
+<HeroOfertas idPromo={promoId} />
+```
+</CodeGroup>
+
+### Component Structure
+
+The component is organized into two main sections:
+
+1. **Left Section (60% width)**: Product/service image
+2. **Right Section (40% width)**: Promotional content
+   - Main title (h1)
+   - Subtitle (h2)
+   - Price display
+   - Additional details text
+   - Feature list
+
+### Layout
+
+```
+┌─────────────────────────────────────┐
+│  ┌──────────┐  ┌───────────────┐   │
+│  │          │  │ TITLE         │   │
+│  │  Image   │  │ Subtitle      │   │
+│  │  (60%)   │  │ €299          │   │
+│  │          │  │ • Feature 1   │   │
+│  └──────────┘  │ • Feature 2   │   │
+│                └───────────────┘   │
+└─────────────────────────────────────┘
+```
+
+### Responsive Behavior
+
+<Tabs>
+  <Tab title="Desktop (>900px)">
+    - Side-by-side layout (image left, content right)
+    - Image: 60% width
+    - Content: 40% width
+    - Font sizes: h1=2.5rem, h2=1.5rem
+  </Tab>
+  <Tab title="Mobile (≤900px)">
+    - Stacked vertical layout
+    - Full width for both sections
+    - Reduced font sizes: h1=1.8rem, h2=1.3rem
+    - Centered text alignment
+    - Adjusted padding and margins
+  </Tab>
+</Tabs>
+
+### Styling Features
+
+<AccordionGroup>
+  <Accordion title="CSS Variables">
+    The component uses custom CSS variables for theming:
+    
+    - `--bg-ofertas`: Background color for the hero section
+    - `--color-ofertas`: Text color for titles and content
+    - `--precio-destacado`: Color for the highlighted price
+    
+    ```css
+    :root {
+      --bg-ofertas: #f8f9fa;
+      --color-ofertas: #212529;
+      --precio-destacado: #28a745;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Typography">
+    - H1: Uppercase transformation, 2.5rem (1.8rem mobile)
+    - H2: Light weight (300), 1.5rem (1.3rem mobile)
+    - Price: 2.5rem (2rem mobile), colored with `--precio-destacado`
+    - List items: 1rem, line-height: 1
+  </Accordion>
+  
+  <Accordion title="Spacing">
+    - Section padding: 1rem
+    - Content gap: 2rem
+    - Max width: 1200px (centered)
+    - List margins: 2rem horizontal on desktop
+  </Accordion>
+</AccordionGroup>
+
+### Customization Examples
+
+<CodeGroup>
+```css Override Colors
+/* In your global CSS or component style */
+:root {
+  --bg-ofertas: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --color-ofertas: #ffffff;
+  --precio-destacado: #ffd700;
+}
+```
+
+```astro Custom Promo Data
+---
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+
+// Add custom promotion to promociones.json
+const customPromo = {
+  id: 'custom-offer',
+  titulo: 'SPECIAL PROMOTION',
+  subtitulo: 'Limited time offer',
+  precio: '499',
+  destacado: 'Save 40%',
+  backgroundImage: '/img/custom-promo.webp',
+  detalles: [
+    'Premium features',
+    '24/7 support',
+    'Free hosting 1 year'
+  ]
+};
+---
+
+<HeroOfertas idPromo="custom-offer" />
+```
+</CodeGroup>
+
+## Welcome Component
+
+The `Welcome.astro` component is a default Astro starter hero component, primarily used for development and testing.
+
+### Features
+
+- Astro logo and branding
+- Links to documentation and Discord
+- Background effects
+- "What's New" callout box
+
+<Info>
+  The Welcome component is typically replaced with HeroOfertas or custom hero components in production builds.
+</Info>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Image Optimization" icon="image">
+    Use WebP format for hero images and set appropriate width/height attributes for better performance.
+  </Card>
+  <Card title="Content Length" icon="text">
+    Keep feature lists to 4-6 items for optimal readability and visual balance.
+  </Card>
+  <Card title="Price Display" icon="dollar-sign">
+    Use the `destacado` field for additional pricing context like "per month" or "limited time".
+  </Card>
+  <Card title="Mobile Testing" icon="mobile">
+    Always test hero components on mobile devices to ensure text readability and proper image scaling.
+  </Card>
+</CardGroup>
+
+## Accessibility
+
+<AccordionGroup>
+  <Accordion title="Image Alt Text">
+    The component uses an empty alt attribute (`alt=""`) for decorative images. For meaningful images, update the template:
+    
+    ```astro
+    <img src={promo.backgroundImage} alt={promo.titulo} />
+    ```
+  </Accordion>
+  
+  <Accordion title="Heading Hierarchy">
+    - Uses semantic HTML with proper h1 and h2 tags
+    - Maintains logical heading structure for screen readers
+    - Consider page context when using h1 tags
+  </Accordion>
+</AccordionGroup>
+
+## Related Components
+
+- **UrgencyBanner** - Add countdown timers to create urgency
+- **BotonPrecios** - Call-to-action buttons for pricing
+- **PromoMain** - Alternative promotional layout
+
+## Source Code Reference
+
+Component location: `src/components/Promociones/HeroOfertas.astro:1-148`
+
+Data source: `src/data/promociones.json`

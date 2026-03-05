@@ -1,0 +1,410 @@
+---
+title: Sitemap Generation
+description: Automatic XML sitemap generation with filtering for SEO optimization
+---
+
+## Overview
+
+The project uses `@astrojs/sitemap` to automatically generate XML sitemaps for search engine optimization. The sitemap includes all public pages with filtering options.
+
+## Installation
+
+Install the sitemap integration:
+
+```bash
+npm install @astrojs/sitemap
+```
+
+## Configuration
+
+Enable sitemap in `astro.config.mjs`:
+
+```javascript
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+  site: 'https://arteywebcreaciones.com',
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes('/recibido-ok') && !page.includes('/presupuesto'),
+    }),
+    // ... other integrations
+  ],
+});
+```
+
+## Key Configuration
+
+### Site URL
+
+```javascript
+site: 'https://arteywebcreaciones.com'
+```
+
+<Warning>
+The `site` property is required for sitemap generation. Without it, URLs will be relative.
+</Warning>
+
+### Page Filtering
+
+Exclude specific pages from the sitemap:
+
+```javascript
+sitemap({
+  filter: (page) => 
+    !page.includes('/recibido-ok') && 
+    !page.includes('/presupuesto'),
+})
+```
+
+**Excluded pages:**
+- `/recibido-ok` - Thank you page
+- `/presupuesto` - Budget form page
+
+**Why exclude these pages?**
+- Not meant for search engines
+- No SEO value
+- Private/internal pages
+
+## Generated Output
+
+The integration generates:
+
+```
+public/
+└── sitemap-index.xml
+```
+
+**Example sitemap-index.xml:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://arteywebcreaciones.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://arteywebcreaciones.com/servicios/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://arteywebcreaciones.com/blog/cuanto-cuesta-una-pagina-web/</loc>
+    <lastmod>2026-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- More URLs... -->
+</urlset>
+```
+
+## Sitemap Reference
+
+Include sitemap reference in HTML:
+
+```html
+<!-- In <head> section -->
+<link rel="sitemap" href="/sitemap-index.xml" />
+```
+
+This is automatically included in `src/layouts/Layout.astro`:
+
+```astro
+---
+const sitemap = "/sitemap-index.xml";
+---
+
+<head>
+  <link rel="sitemap" href={sitemap} />
+</head>
+```
+
+## Advanced Filtering
+
+### Multiple Conditions
+
+```javascript
+sitemap({
+  filter: (page) => {
+    // Exclude thank you pages
+    if (page.includes('/recibido-ok')) return false;
+    
+    // Exclude internal tools
+    if (page.includes('/admin')) return false;
+    
+    // Exclude draft pages
+    if (page.includes('/draft')) return false;
+    
+    // Include everything else
+    return true;
+  },
+})
+```
+
+### Pattern Matching
+
+```javascript
+sitemap({
+  filter: (page) => {
+    const excludePatterns = [
+      '/recibido-ok',
+      '/presupuesto',
+      '/admin',
+      '/test',
+    ];
+    
+    return !excludePatterns.some(pattern => page.includes(pattern));
+  },
+})
+```
+
+### Regex Filtering
+
+```javascript
+sitemap({
+  filter: (page) => {
+    // Exclude pages ending with -draft or -test
+    return !/(draft|test)\/?$/.test(page);
+  },
+})
+```
+
+## Custom Sitemap Options
+
+### Change Frequency
+
+```javascript
+sitemap({
+  changefreq: 'weekly',
+  priority: 0.7,
+  lastmod: new Date(),
+})
+```
+
+### Customize Per Page
+
+```javascript
+sitemap({
+  customPages: [
+    {
+      url: 'https://arteywebcreaciones.com/',
+      changefreq: 'daily',
+      priority: 1.0,
+    },
+    {
+      url: 'https://arteywebcreaciones.com/servicios/',
+      changefreq: 'weekly',
+      priority: 0.9,
+    },
+  ],
+})
+```
+
+### i18n Support
+
+For multilingual sites:
+
+```javascript
+sitemap({
+  i18n: {
+    defaultLocale: 'es',
+    locales: {
+      es: 'es-ES',
+      en: 'en-US',
+    },
+  },
+})
+```
+
+## Dynamic Content
+
+### Blog Posts
+
+Blog posts from Content Collections are automatically included:
+
+```typescript
+// src/pages/blog/[...slug].astro
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+```
+
+These pages appear in the sitemap automatically.
+
+### Filtered Blog Posts
+
+Exclude draft posts:
+
+```typescript
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return data.draft !== true;
+  });
+  
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+```
+
+## Submit Sitemap
+
+### Google Search Console
+
+1. Go to [Google Search Console](https://search.google.com/search-console)
+2. Select your property
+3. Navigate to **Sitemaps**
+4. Enter: `https://arteywebcreaciones.com/sitemap-index.xml`
+5. Click **Submit**
+
+### Bing Webmaster Tools
+
+1. Go to [Bing Webmaster Tools](https://www.bing.com/webmasters)
+2. Add your site
+3. Submit sitemap URL: `https://arteywebcreaciones.com/sitemap-index.xml`
+
+### robots.txt
+
+Reference sitemap in `public/robots.txt`:
+
+```txt
+User-agent: *
+Allow: /
+
+Sitemap: https://arteywebcreaciones.com/sitemap-index.xml
+```
+
+## Validation
+
+### XML Validator
+
+Check sitemap validity:
+
+```bash
+# Visit your sitemap
+https://arteywebcreaciones.com/sitemap-index.xml
+
+# Or use online validator
+https://www.xml-sitemaps.com/validate-xml-sitemap.html
+```
+
+### Google Validator
+
+Test in Google Search Console:
+
+1. Go to **Sitemaps**
+2. View submitted sitemap
+3. Check for errors
+
+## Troubleshooting
+
+### Sitemap Not Generated
+
+1. Verify `site` is set in config
+2. Check build output for errors
+3. Ensure integration is properly installed
+
+```bash
+npm run build
+# Check dist/sitemap-index.xml exists
+```
+
+### Missing Pages
+
+1. Check page is not filtered out
+2. Verify page is statically generated
+3. Ensure page is in `src/pages/`
+
+```javascript
+// Debug: Remove filter temporarily
+sitemap()
+```
+
+### Wrong URLs
+
+1. Verify `site` URL is correct
+2. Check for trailing slashes
+3. Ensure HTTPS in production
+
+```javascript
+site: 'https://arteywebcreaciones.com' // No trailing slash
+```
+
+## Multiple Sitemaps
+
+For large sites, split into multiple sitemaps:
+
+```javascript
+sitemap({
+  serialize(item) {
+    // Group by content type
+    if (item.url.includes('/blog/')) {
+      return {
+        ...item,
+        sitemap: 'blog',
+      };
+    }
+    return item;
+  },
+})
+```
+
+Generates:
+- `sitemap-index.xml` (main index)
+- `sitemap-blog.xml` (blog posts)
+- `sitemap-0.xml` (other pages)
+
+## Best Practices
+
+### Update Frequency
+
+```javascript
+sitemap({
+  changefreq: 'weekly', // Realistic update frequency
+  priority: 0.7,        // Relative importance
+})
+```
+
+### Page Priority
+
+```
+Homepage:        1.0
+Main sections:   0.8-0.9
+Blog posts:      0.6-0.7
+Other pages:     0.5
+```
+
+### Exclude Properly
+
+```javascript
+// Exclude:
+- Thank you pages
+- 404 pages
+- Admin sections
+- Draft content
+- Private pages
+```
+
+## Performance Impact
+
+Sitemap generation:
+- Runs at build time
+- No runtime performance impact
+- Minimal build time increase
+
+## Related Documentation
+
+- [SEO Setup](/configuration/seo-setup)
+- [URL Redirects](/configuration/redirects)
+- [Astro Configuration](/configuration/astro-config)
+- [Deployment](/configuration/deployment)

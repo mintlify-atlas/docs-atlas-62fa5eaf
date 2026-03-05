@@ -1,0 +1,475 @@
+---
+title: Astro Framework Overview
+description: How Astro powers the Arte y Web Creaciones website
+---
+
+Arte y Web Creaciones is built with [Astro](https://astro.build), a modern web framework designed for building fast, content-focused websites. This page explains how Astro is used in this project and why it was chosen.
+
+## What is Astro?
+
+Astro is a web framework that delivers the best performance by default through a unique architecture:
+
+- **Zero JS by default** - Astro strips out JavaScript automatically, sending only HTML and CSS to the browser
+- **Islands Architecture** - Interactive components are isolated, only loading JavaScript where needed
+- **Component-agnostic** - Use components from React, Vue, Svelte, or Astro's own format
+- **Content-focused** - Built specifically for content-rich sites like blogs and marketing pages
+
+<Note>
+The Arte y Web Creaciones website uses **Astro 5.12.1**, which includes the latest performance improvements and features.
+</Note>
+
+## Why Astro for This Project?
+
+Arte y Web Creaciones is a web design agency website that needs to:
+
+1. **Load blazingly fast** - First impressions matter for potential clients
+2. **Rank well in search engines** - SEO is critical for lead generation
+3. **Handle lots of content** - Blog posts, service pages, and promotional content
+4. **Be easy to maintain** - Content updates should be simple
+
+Astro excels at all of these requirements.
+
+## Project Configuration
+
+The Astro configuration is defined in `astro.config.mjs`:
+
+```js astro.config.mjs
+import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
+import tailwind from '@astrojs/tailwind';
+import mdx from '@astrojs/mdx';
+import icon from 'astro-icon';
+
+export default defineConfig({
+  site: 'https://arteywebcreaciones.com',
+  server: {
+    port: 4322,
+  },
+  redirects: {
+    '/compras/comprar-web-single': '/compras/comprar-web-onepage',
+    '/blog/cuanto-cuesta-crear-una-pagina-web': '/blog/cuanto-cuesta-una-pagina-web',
+  },
+  integrations: [
+    sitemap({
+      filter: (page) => 
+        !page.includes('/recibido-ok') && 
+        !page.includes('/presupuesto'),
+    }), 
+    tailwind(), 
+    mdx(), 
+    icon({
+      include: {
+        mdi: ['*'], // All Material Design Icons
+      },
+    })
+  ],
+});
+```
+
+### Key Configuration Features
+
+<AccordionGroup>
+
+<Accordion title="Site URL">
+The `site` property defines the production URL:
+
+```js
+site: 'https://arteywebcreaciones.com',
+```
+
+This is used for:
+- Generating canonical URLs
+- Creating the sitemap
+- Building absolute URLs for RSS feeds
+</Accordion>
+
+<Accordion title="Custom Port">
+The development server runs on port **4322** instead of Astro's default 4321:
+
+```js
+server: {
+  port: 4322,
+},
+```
+
+Access the dev server at `http://localhost:4322`.
+</Accordion>
+
+<Accordion title="URL Redirects">
+Server-side redirects are configured for URL changes:
+
+```js
+redirects: {
+  '/compras/comprar-web-single': '/compras/comprar-web-onepage',
+  '/blog/cuanto-cuesta-crear-una-pagina-web': '/blog/cuanto-cuesta-una-pagina-web',
+}
+```
+
+These maintain SEO value when URLs change.
+</Accordion>
+
+<Accordion title="Sitemap Generation">
+Automatically generates an XML sitemap with filtering:
+
+```js
+sitemap({
+  filter: (page) => 
+    !page.includes('/recibido-ok') && 
+    !page.includes('/presupuesto'),
+})
+```
+
+Thank you pages and form submission pages are excluded from the sitemap.
+</Accordion>
+
+</AccordionGroup>
+
+## Integrations
+
+The project uses four official Astro integrations:
+
+### 1. Sitemap (`@astrojs/sitemap`)
+
+<Card title="@astrojs/sitemap" icon="map" href="https://docs.astro.build/en/guides/integrations-guide/sitemap/">
+Generates XML sitemaps automatically
+</Card>
+
+Automatically creates a sitemap at `/sitemap-index.xml` for search engines to discover all pages.
+
+### 2. Tailwind CSS (`@astrojs/tailwind`)
+
+<Card title="@astrojs/tailwind" icon="palette" href="https://docs.astro.build/en/guides/integrations-guide/tailwind/">
+Integrates Tailwind CSS utility framework
+</Card>
+
+Enables using Tailwind utility classes directly in Astro components:
+
+```astro
+<div class="flex items-center gap-4 p-6 rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold text-slate-900">Heading</h2>
+</div>
+```
+
+Tailwind configuration is in `tailwind.config.mjs`.
+
+### 3. MDX (`@astrojs/mdx`)
+
+<Card title="@astrojs/mdx" icon="markdown" href="https://docs.astro.build/en/guides/integrations-guide/mdx/">
+Use JSX components in Markdown content
+</Card>
+
+MDX allows using Astro components inside Markdown files. This is used extensively in blog posts:
+
+```mdx src/content/blog/example.md
+---
+title: "My Blog Post"
+---
+
+## Regular Markdown
+
+This is regular markdown content.
+
+<Alert type="tip" title="Pro Tip">
+You can use Astro components directly in MDX!
+</Alert>
+```
+
+### 4. Astro Icon (`astro-icon`)
+
+<Card title="astro-icon" icon="icons" href="https://github.com/natemoo-re/astro-icon">
+Flexible icon system with 100,000+ icons
+</Card>
+
+Provides access to all Material Design Icons:
+
+```astro
+---
+import { Icon } from "astro-icon/components";
+---
+
+<Icon name="mdi:check-circle" class="w-6 h-6 text-green-500" />
+```
+
+The project includes all MDI icons via `@iconify-json/mdi`.
+
+## Astro Components
+
+Astro's component format (`.astro` files) is the core building block of this project. Here's the anatomy of an Astro component:
+
+```astro src/components/Alert.astro
+---
+// Component Script (runs at build time)
+import { Icon } from "astro-icon/components";
+
+export interface Props {
+    type?: "info" | "success" | "warning" | "error" | "tip";
+    title?: string;
+}
+
+const { type = "info", title } = Astro.props;
+
+const types = {
+    info: {
+        bg: "bg-blue-50 border-blue-200",
+        iconColor: "text-blue-500",
+        icon: "mdi:information",
+    },
+    // ... other types
+};
+
+const current = types[type] || types.info;
+---
+
+<!-- Component Template (HTML) -->
+<div class={`flex gap-4 p-[1.2rem] my-8 rounded-xl ${current.bg}`}>
+    <div class="flex-shrink-0 mt-1">
+        <Icon name={current.icon} class={`w-7 h-7 ${current.iconColor}`} />
+    </div>
+    <div class="flex-1">
+        {title && (
+            <h4 class={`font-bold text-lg ${current.titleColor}`}>
+                {title}
+            </h4>
+        )}
+        <div class="text-slate-700">
+            <slot />
+        </div>
+    </div>
+</div>
+
+<style>
+/* Component Styles (scoped by default) */
+</style>
+```
+
+### Component Structure
+
+<Steps>
+
+<Step title="Frontmatter (Component Script)">
+The area between `---` fences contains JavaScript/TypeScript that runs at **build time**:
+
+- Import other components and utilities
+- Define TypeScript interfaces for props
+- Process data and compute values
+- Fetch content from collections
+
+```astro
+---
+import Layout from "@/layouts/Layout.astro";
+const { title } = Astro.props;
+const greeting = `Hello, ${title}!`;
+---
+```
+</Step>
+
+<Step title="Template (HTML)">
+The HTML-like template that defines the component's structure:
+
+- Use standard HTML elements
+- Include other components
+- Insert JavaScript expressions with `{}`
+- Use `<slot />` for content projection
+
+```astro
+<div>
+  <h1>{greeting}</h1>
+  <slot />
+</div>
+```
+</Step>
+
+<Step title="Styles (Optional)">
+Scoped CSS that applies only to this component:
+
+```astro
+<style>
+  h1 {
+    color: blue;
+  }
+</style>
+```
+
+Styles are scoped by default - they won't leak to other components.
+</Step>
+
+</Steps>
+
+## File-Based Routing
+
+Astro uses **file-based routing** - the file structure in `src/pages/` determines your URL structure:
+
+```text
+src/pages/
+├── index.astro                    → /
+├── contacto.astro                 → /contacto
+├── nosotros.astro                 → /nosotros
+├── blog/
+│   ├── index.astro                → /blog
+│   └── [...slug].astro            → /blog/* (dynamic routes)
+├── servicios/
+│   ├── creacion-de-paginas-web.astro     → /servicios/creacion-de-paginas-web
+│   └── creacion-de-tiendas-online.astro  → /servicios/creacion-de-tiendas-online
+└── 404.astro                      → 404 error page
+```
+
+### Dynamic Routes
+
+The blog uses a dynamic route with `[...slug].astro`:
+
+```astro src/pages/blog/[...slug].astro
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import Layout from "@/layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post: CollectionEntry<"blog">) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
+}
+
+type Props = CollectionEntry<"blog">;
+const post = Astro.props;
+const { title, description, heroImage, tags } = post.data;
+const { Content } = await render(post);
+---
+
+<Layout title={title} description={description} image={heroImage} keywords={tags}>
+  <BlogPost {...post.data}>
+    <Content />
+  </BlogPost>
+</Layout>
+```
+
+This single file generates all blog post pages:
+- `/blog/10-pasos-para-crear-tu-web-profesional`
+- `/blog/cuanto-cuesta-una-pagina-web`
+- And all other blog posts from the content collection
+
+## The Layout Pattern
+
+The project uses a main layout wrapper (`Layout.astro`) that all pages use:
+
+```astro src/layouts/Layout.astro
+---
+import Navbar from "@/components/NavBar.astro";
+import Footer from "@/components/Footer.astro";
+import Cookies from "@/components/Legales/Cookies.astro";
+
+const title = Astro.props.title || "Diseño Web Profesional desde 190€";
+const description = Astro.props.description || "Default description";
+const canonical = `https://arteywebcreaciones.com${Astro.url.pathname}`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <!-- Google Fonts, meta tags, Schema.org, etc. -->
+  </head>
+  <body>
+    <Navbar />
+    <slot />
+    <Footer />
+    <Cookies />
+  </body>
+</html>
+```
+
+Every page wraps its content in this layout:
+
+```astro src/pages/contacto.astro
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Contacto" description="Contacta con nosotros">
+  <h1>Página de Contacto</h1>
+  <!-- Page content here -->
+</Layout>
+```
+
+The layout provides:
+- Consistent navigation and footer
+- SEO meta tags and Open Graph
+- Google Analytics and Tag Manager
+- Schema.org structured data
+- Cookie consent banner
+
+## Build Process
+
+When you run `npm run build`, Astro:
+
+1. **Processes all components** - Runs component scripts at build time
+2. **Fetches content** - Loads all content collections
+3. **Generates static HTML** - Creates optimized HTML files
+4. **Optimizes assets** - Processes images, CSS, and minimal JavaScript
+5. **Creates routes** - Generates all static and dynamic pages
+
+<Note>
+The result is a fully static site with no runtime dependencies. It can be hosted on any static hosting service like Netlify, Vercel, or even a simple web server.
+</Note>
+
+### Output
+
+The build creates a `dist/` directory:
+
+```text
+dist/
+├── index.html
+├── contacto/index.html
+├── blog/
+│   ├── index.html
+│   └── 10-pasos-para-crear-tu-web-profesional/index.html
+├── _astro/              # Optimized CSS and JS
+└── img/                 # Copied from public/
+```
+
+## Performance Benefits
+
+<CardGroup cols={2}>
+
+<Card title="Zero JavaScript by Default" icon="bolt">
+Astro sends pure HTML and CSS. No framework runtime overhead.
+</Card>
+
+<Card title="Partial Hydration" icon="water">
+Only interactive components load JavaScript, using Astro's Islands Architecture.
+</Card>
+
+<Card title="Build-Time Rendering" icon="hammer">
+All pages are pre-rendered at build time for instant loading.
+</Card>
+
+<Card title="Optimized Assets" icon="image">
+Automatic CSS minification and image optimization with Sharp.
+</Card>
+
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+
+<Card title="Content Collections" icon="folder" href="/concepts/content-collections">
+Learn how content is structured with type-safe schemas
+</Card>
+
+<Card title="Component Architecture" icon="puzzle-piece" href="/concepts/component-architecture">
+Explore how components are organized and used
+</Card>
+
+</CardGroup>
+
+## Further Reading
+
+<Card title="Astro Documentation" icon="book" href="https://docs.astro.build">
+Official Astro documentation with comprehensive guides
+</Card>

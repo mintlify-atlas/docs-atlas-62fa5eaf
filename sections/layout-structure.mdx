@@ -1,0 +1,320 @@
+---
+title: Layout Structure
+description: Understanding the site layout structure and global components
+---
+
+# Layout Structure
+
+Arte y Web Creaciones uses a consistent layout structure across all pages, defined in `src/layouts/Layout.astro`. This layout provides SEO optimization, meta tags, global styles, and common components.
+
+## Main Layout Component
+
+Location: `src/layouts/Layout.astro`
+
+### Key Features
+
+- **SEO-optimized meta tags**
+- **Open Graph and Twitter Card support**
+- **Google Fonts integration** (Inter & Outfit)
+- **Google Tag Manager integration**
+- **Schema.org structured data**
+- **Global CSS imports**
+- **Navbar and Footer components**
+- **Cookie consent component**
+
+## Layout Structure Overview
+
+```astro
+---
+import Navbar from "@/components/NavBar.astro";
+import Footer from "@/components/Footer.astro";
+import Cookies from "@/components/Legales/Cookies.astro";
+
+import "../styles/reset.css";
+import "../styles/global.css";
+import "../styles/estiloBase.css";
+
+const title = Astro.props.title || "Diseño Web Profesional desde 190€ | Arte y Web Creaciones";
+const description = Astro.props.description || "Diseño web profesional y tiendas online desde 190€...";
+// ... other props
+---
+
+<!doctype html>
+<html lang="es" data-bs-theme="light">
+  <head>
+    <!-- Meta tags -->
+    <!-- Google Fonts -->
+    <!-- Google Tag Manager -->
+    <!-- Schema.org JSON-LD -->
+  </head>
+  <body>
+    <Navbar />
+    <slot />
+    <Footer />
+    <Cookies />
+  </body>
+</html>
+```
+
+## Props and Defaults
+
+The layout accepts props to customize SEO and metadata:
+
+### Available Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | `string` | "Diseño Web Profesional desde 190€ \| Arte y Web Creaciones" | Page title |
+| `description` | `string` | "Diseño web profesional y tiendas online desde 190€..." | Meta description |
+| `keywords` | `string` | "diseño web profesional, páginas web, tiendas online..." | SEO keywords |
+| `image` | `string` | "https://arteywebcreaciones.com/img/hero-imagen.webp" | OG/Twitter image |
+| `websiteName` | `string` | "Arte y Web Creaciones" | Site name for OG |
+| `robots` | `string` | "index, follow, max-image-preview:large..." | Robot directives |
+
+### Example Usage
+
+```astro
+---
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout 
+  title="Custom Page Title | Arte y Web Creaciones"
+  description="Custom page description for SEO"
+  keywords="custom, keywords, here"
+>
+  <!-- Page content goes here -->
+  <div>
+    <h1>Page Content</h1>
+  </div>
+</Layout>
+```
+
+## Canonical URL Generation
+
+The layout automatically generates canonical URLs based on the current path:
+
+```javascript
+const pathname = Astro.url.pathname;
+const cleanPathname = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+const canonical = `https://arteywebcreaciones.com${cleanPathname}`;
+```
+
+This removes trailing slashes (except for the home page) to ensure consistent canonical URLs.
+
+## Meta Tags
+
+### Basic SEO Tags
+
+From `src/layouts/Layout.astro:40-66`:
+
+```html
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="robots" content={robots} />
+<link rel="canonical" href={canonical} />
+<meta name="keywords" content={keywords} />
+<meta name="publisher" content="Arte y Web Creaciones" />
+<meta name="author" content="Arte y Web Creaciones" />
+```
+
+### Open Graph Tags
+
+From `src/layouts/Layout.astro:68-76`:
+
+```html
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:url" content={canonical} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={websiteName} />
+<meta property="og:locale" content="es_ES" />
+```
+
+### Twitter Card Tags
+
+From `src/layouts/Layout.astro:78-83`:
+
+```html
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+<meta name="twitter:site" content="@arte_y_web" />
+```
+
+## Google Fonts
+
+The layout imports two Google Font families:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet"
+/>
+```
+
+- **Inter**: Used for body text (weights: 300, 400, 500, 600)
+- **Outfit**: Used for headings (weights: 400, 500, 600, 700, 800)
+
+## Global CSS Structure
+
+Imported in order:
+
+```astro
+import "../styles/reset.css";      // CSS reset
+import "../styles/global.css";     // Global styles
+import "../styles/estiloBase.css"; // Base component styles
+```
+
+### Global CSS Location
+
+```
+src/styles/
+├── reset.css       # Browser reset/normalize
+├── global.css      # Global variables and base styles
+└── estiloBase.css  # Component base styles
+```
+
+## Global Components
+
+### Navbar
+
+Location: `src/components/NavBar.astro`
+
+- Site navigation
+- Logo/branding
+- Mobile menu
+- Navigation links from `menu.json`
+
+### Footer
+
+Location: `src/components/Footer.astro`
+
+- Site links
+- Contact information
+- Social media links
+- Legal links (Privacy, Terms, Cookies)
+
+### Cookies Component
+
+Location: `src/components/Legales/Cookies.astro`
+
+- Cookie consent banner
+- GDPR compliance
+- Cookie preferences management
+
+## Schema.org Structured Data
+
+The layout includes JSON-LD structured data for SEO (from line 97+):
+
+```html
+<script is:inline type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "Arte y Web Creaciones",
+    "description": "Diseño web profesional...",
+    "url": "https://arteywebcreaciones.com",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Benidorm",
+      "addressCountry": "ES"
+    }
+  }
+</script>
+```
+
+This helps search engines understand your business information.
+
+## Google Tag Manager
+
+Integrated via script:
+
+```html
+<script src="/gtm.js" defer></script>
+```
+
+The GTM script is loaded from the public directory and handles analytics tracking after cookie consent.
+
+## HTML Attributes
+
+```html
+<html lang="es" data-bs-theme="light">
+```
+
+- `lang="es"`: Sets Spanish as the page language
+- `data-bs-theme="light"`: Bootstrap theme mode (if using Bootstrap)
+
+## Viewport Meta Tag
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```
+
+Ensures proper responsive behavior on mobile devices.
+
+## Favicon
+
+```html
+<link rel="icon" type="image/png" href="/favicon.png" />
+```
+
+Favicon should be placed at `public/favicon.png`.
+
+## Sitemap Link
+
+```html
+<link rel="sitemap" href="/sitemap-index.xml" />
+```
+
+Points to the auto-generated sitemap for search engine crawlers.
+
+## Creating a New Page with Layout
+
+1. Create a new `.astro` file in `src/pages/`
+2. Import and use the Layout component:
+
+```astro
+---
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout 
+  title="New Page Title | Arte y Web Creaciones"
+  description="Description for this new page"
+>
+  <main>
+    <h1>New Page</h1>
+    <p>Content goes here</p>
+  </main>
+</Layout>
+```
+
+3. The Navbar, Footer, and Cookies components will automatically be included
+
+## Best Practices
+
+1. **Always use the Layout**: Wrap all pages with `<Layout>` for consistency
+2. **Customize meta tags**: Pass custom `title` and `description` for each page
+3. **Use semantic HTML**: Wrap page content in `<main>` tags
+4. **OG images**: Provide custom `image` prop for social sharing
+5. **Keep titles unique**: Each page should have a descriptive, unique title
+6. **Maintain canonical URLs**: Let the layout handle canonical URL generation
+
+## Accessibility Features
+
+- Semantic HTML structure
+- Proper language attribute (`lang="es"`)
+- Meta viewport for responsive design
+- Accessible navigation components
+
+## Performance Optimizations
+
+- Font preconnect for faster font loading
+- Deferred GTM script loading
+- CSS in optimal load order
+- Proper caching headers (via Astro config)

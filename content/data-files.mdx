@@ -1,0 +1,297 @@
+---
+title: Data Files
+description: JSON data files for services, pricing, testimonials, and site content
+---
+
+# Data Files
+
+Arte y Web Creaciones uses JSON data files to store structured content for various sections of the website. These files are located in `src/data/` and provide centralized data management.
+
+## Available Data Files
+
+Located in `src/data/`:
+
+- `servicios.json` - Service offerings and cards
+- `precios.json` - Pricing tiers and packages
+- `promociones.json` - Promotional offers
+- `procesoentrega.json` - Delivery process steps
+- `testimonios.json` - Client testimonials
+- `nosotros.json` - About/team information
+- `menu.json` - Navigation menu structure
+- `nuestraswebs.json` - Portfolio/showcase websites
+- `mantenimiento.json` - Maintenance service details
+- `google-reviews.json` - Google review data
+- `cards.json` - Generic card content
+- `descarte.json` - Archived/unused content
+
+## servicios.json
+
+Defines service offerings with detailed cards. Located at `src/data/servicios.json`.
+
+### Structure
+
+```json
+[
+  {
+    "id": "1",
+    "background": "/img/Cards/Web/bg-webs.webp",
+    "backgroundImage": "/img/Cards/Web/bg-webs.webp",
+    "titulo": "Página web hecha por profesionales",
+    "subtitulo": "Tu página web funcionando SIEMPRE. (Tiempo promedio de creación: 7 días.)",
+    "textoboton": "Web Pro 470€",
+    "nombre": "Funcionalidades de la página web",
+    "link": "/precios/precios-paginas-web/",
+    "tipoweb": "Web Pro",
+    "precio": "470€",
+    "cards": [
+      {
+        "image": "/img/Cards/Web/presencia-mundial-global.webp",
+        "title": "Presencia mundial global",
+        "description": "Tener tu presencia en internet y que te encuentren...",
+        "link": "/contacto/"
+      }
+    ]
+  }
+]
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `string` | Unique identifier |
+| `background` | `string` | Background image path |
+| `titulo` | `string` | Service title |
+| `subtitulo` | `string` | Service subtitle/description |
+| `textoboton` | `string` | Button text |
+| `link` | `string` | Service detail page URL |
+| `tipoweb` | `string` | Website type label |
+| `precio` | `string` | Price display |
+| `cards` | `array` | Array of feature cards |
+
+### Card Structure
+
+```json
+{
+  "image": "/img/Cards/Web/card-image.webp",
+  "title": "Card Title",
+  "description": "Card description text",
+  "link": "/link-url/"
+}
+```
+
+## precios.json
+
+Defines pricing tiers for web pages and online stores. Located at `src/data/precios.json`.
+
+### Structure
+
+```json
+[
+  {
+    "id": "0",
+    "background": "/img/Cards/Precios/creacion-pagina-web.webp",
+    "titulo": "Precios de páginas web",
+    "subtitulo": "Elige entre los mejores precios de páginas web",
+    "botontexto": "Ver Precios de tiendas online",
+    "botonlink": "/precios/precios-tiendas-online",
+    "cards": [
+      {
+        "slug": "comprar-web-onepage",
+        "tipoPago": "unico",
+        "imagenOferta": "/img/ofertas/web-onepage-en-oferta.webp",
+        "itemPaypal": "Reserva Web OnePage",
+        "titulo": "Web OnePage",
+        "subtitulo": "Amplía mientras creces",
+        "precio": "190",
+        "detalle1": "Dominio (1 año) y Hosting (6 meses)",
+        "detalle2": "OnePage – 5 secciones",
+        "detalle3": "1 idioma",
+        "detalle4": "1 cuenta de correo"
+      }
+    ]
+  }
+]
+```
+
+### Price Card Fields
+
+Each pricing card supports up to 17 detail fields (`detalle1` through `detalle17`). Empty fields should be set to `""`.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `slug` | `string` | URL-friendly identifier |
+| `tipoPago` | `string` | Payment type: "unico" or "fases" |
+| `imagenOferta` | `string` | Offer image path |
+| `itemPaypal` | `string` | PayPal item description |
+| `titulo` | `string` | Package title |
+| `subtitulo` | `string` | Package tagline |
+| `precio` | `string` | Price (numeric string) |
+| `detalle1-17` | `string` | Feature details |
+
+## procesoentrega.json
+
+Defines the delivery/work process steps. Located at `src/data/procesoentrega.json`.
+
+### Structure
+
+```json
+[
+  {
+    "title": "Diagnóstico Inicial y Estrategia",
+    "body": "Todo gran proyecto comienza con una buena charla. Nos pondremos en contacto contigo para entender a fondo tu empresa, sector y objetivos. En esta fase definimos juntos la identidad de tu web: colores corporativos, logotipo y la actividad clave que quieres potenciar. Si aún no tienes claro qué necesitas, te aconsejamos sobre <a href='/blog/necesito-web/'>por qué una web profesional es tu mejor comercial 24/7</a>."
+  },
+  {
+    "title": "Propuestas de Diseño Personalizadas",
+    "body": "No usamos plantillas genéricas. En pocos días te presentamos un par de propuestas visuales diseñadas exclusivamente para tu negocio. Buscamos el equilibrio perfecto entre estética y conversión, aplicando <a href='/blog/cta-call-to-action-convertir-visitas-clientes/'>estratégias de Call to Action</a> para que tus visitas se conviertan en clientes reales."
+  }
+]
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Step title |
+| `body` | `string` | HTML content (supports links) |
+
+## nosotros.json
+
+About/team information. Located at `src/data/nosotros.json`.
+
+### Structure
+
+```json
+{
+  "nombre": "Dan Master",
+  "ubicacion": "Benidorm, España",
+  "cargo": "Consultor & Diseñador Web Estratégico",
+  "imagen": "/img/dan_master_profesional.webp",
+  "parrafos": [
+    "<strong>Más de 20 años transformando negocios a través de la tecnología.</strong> Mi enfoque no se limita a \"hacer webs\"...",
+    "Entiendo que un cliente exigente valora tres cosas: <strong>claridad, cumplimiento y resultados</strong>..."
+  ],
+  "cta": "¿Listo para diferenciarte de tu competencia?",
+  "colaboradores": [
+    {
+      "nombre": "Diseño UI/UX",
+      "imagen": "https://randomuser.me/api/portraits/women/44.jpg"
+    }
+  ]
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `nombre` | `string` | Person name |
+| `ubicacion` | `string` | Location |
+| `cargo` | `string` | Job title/position |
+| `imagen` | `string` | Profile image path |
+| `parrafos` | `string[]` | Array of HTML paragraphs |
+| `cta` | `string` | Call-to-action text |
+| `colaboradores` | `array` | Team members |
+
+## Using Data Files in Astro
+
+### Import and Use
+
+```astro
+---
+import servicios from '@/data/servicios.json';
+import precios from '@/data/precios.json';
+import procesoEntrega from '@/data/procesoentrega.json';
+
+const servicio = servicios[0];
+const preciosTienda = precios[1];
+---
+
+<div>
+  <h2>{servicio.titulo}</h2>
+  <p>{servicio.subtitulo}</p>
+  
+  {servicio.cards.map(card => (
+    <div>
+      <img src={card.image} alt={card.title} />
+      <h3>{card.title}</h3>
+      <p>{card.description}</p>
+    </div>
+  ))}
+</div>
+```
+
+### Filter by ID
+
+```astro
+---
+import servicios from '@/data/servicios.json';
+
+const { idServicio } = Astro.props;
+const servicio = servicios.find(s => s.id === idServicio);
+---
+
+{!servicio ? (
+  <p>Servicio no encontrado.</p>
+) : (
+  <div>{servicio.titulo}</div>
+)}
+```
+
+### HTML Content
+
+Many fields contain HTML (especially in `procesoentrega.json` and `nosotros.json`). Use `set:html` in Astro:
+
+```astro
+{procesoEntrega.map(item => (
+  <div>
+    <h3>{item.title}</h3>
+    <p set:html={item.body} />
+  </div>
+))}
+```
+
+## Data File Best Practices
+
+1. **Keep paths absolute**: Start image/link paths with `/`
+2. **Use WebP images**: All image references use `.webp` format
+3. **HTML in strings**: Use proper escaping for quotes in HTML content
+4. **Consistent IDs**: Use string IDs ("1", "2") for consistency
+5. **Empty fields**: Use empty strings `""` rather than null/undefined
+6. **SEO-friendly links**: Include descriptive internal links in content
+
+## Updating Data Files
+
+1. Navigate to `src/data/`
+2. Edit the appropriate JSON file
+3. Validate JSON syntax
+4. Save and rebuild - Astro will hot-reload in dev mode
+
+## Example: Adding a New Service
+
+To add a new service to `servicios.json`:
+
+```json
+{
+  "id": "6",
+  "background": "/img/Cards/Web/bg-new-service.webp",
+  "backgroundImage": "/img/Cards/Web/bg-new-service.webp",
+  "titulo": "New Service Title",
+  "subtitulo": "Service description",
+  "textoboton": "Service from 299€",
+  "nombre": "Service Features",
+  "link": "/precios/new-service/",
+  "tipoweb": "Service Type",
+  "precio": "299€",
+  "cards": [
+    {
+      "image": "/img/Cards/NewService/feature-1.webp",
+      "title": "Feature Title",
+      "description": "Feature description text",
+      "link": "/contacto/"
+    }
+  ]
+}
+```
+
+Add this object to the array in `servicios.json` and it will be available throughout the site.

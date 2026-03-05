@@ -1,0 +1,622 @@
+---
+title: Content Collections
+description: How content is structured and managed using Astro's Content Collections API
+---
+
+Arte y Web Creaciones uses Astro's **Content Collections** API to manage all content with type-safe schemas and automatic validation. This ensures consistency and catches errors at build time.
+
+## What Are Content Collections?
+
+Content Collections are Astro's way of organizing and managing content files (Markdown, MDX, JSON) with:
+
+- **Type safety** - Define schemas with Zod for automatic validation
+- **IntelliSense** - Get autocomplete for frontmatter fields
+- **Build-time validation** - Catch errors before deployment
+- **Flexible loading** - Use glob patterns to load files from anywhere
+
+<Note>
+This project uses Astro's modern loader-based API with the `glob` loader, which replaced the older directory-based approach.
+</Note>
+
+## Project Collections
+
+The project has **four content collections** defined in `src/content.config.ts`:
+
+```typescript src/content.config.ts
+import { glob } from 'astro/loaders';
+import { defineCollection, z } from 'astro:content';
+
+export const collections = {
+  blog,           // Blog posts
+  promoSingle,    // One-page website promotions  
+  promoPro,       // Professional website promotions
+  promoTienda,    // E-commerce website promotions
+};
+```
+
+### Collection Structure
+
+```text
+src/content/
+├── blog/                  # Blog posts (Markdown/MDX)
+│   ├── 10-pasos-para-crear-tu-web-profesional.md
+│   ├── cuanto-cuesta-una-pagina-web.md
+│   └── ... (50+ blog posts)
+├── promoSingle/          # One-page promotion data
+│   └── promoSingle.md
+├── promoPro/             # Professional web promotion data
+│   └── promoPro.md
+└── promoTienda/          # E-commerce promotion data
+    └── promoTienda.md
+```
+
+## Blog Collection
+
+The blog collection is the most commonly used collection. Here's how it's defined:
+
+### Schema Definition
+
+```typescript src/content.config.ts
+const blog = defineCollection({
+  // Load all .md and .mdx files from src/content/blog/
+  loader: glob({ 
+    base: './src/content/blog', 
+    pattern: '**/*.{md,mdx}' 
+  }),
+  
+  // Schema defines required and optional fields
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),      // Automatically converts to Date
+    draft: z.boolean(),
+    tags: z.array(z.string()).optional(),
+    heroImage: z.string().optional(),
+    publisher: z.string().optional(),
+  }),
+});
+```
+
+### Field Breakdown
+
+<AccordionGroup>
+
+<Accordion title="title (required)">
+**Type:** `string`
+
+The blog post title, used in:
+- Page `<title>` tag
+- Open Graph meta tags
+- Blog post header
+
+```md
+title: "10 Pasos Para Crear Tu Web Profesional"
+```
+</Accordion>
+
+<Accordion title="description (required)">
+**Type:** `string`
+
+A compelling description for SEO and social sharing:
+
+```md
+description: "✅ Guía completa: 10 pasos para crear tu web profesional desde CERO | Diseño, desarrollo y SEO"
+```
+</Accordion>
+
+<Accordion title="pubDate (required)">
+**Type:** `date` (coerced from string)
+
+Publication date in YYYY-MM-DD format:
+
+```md
+pubDate: '2025-09-13'
+```
+
+The `z.coerce.date()` automatically converts the string to a JavaScript Date object.
+</Accordion>
+
+<Accordion title="draft (required)">
+**Type:** `boolean`
+
+Controls whether the post is published:
+
+```md
+draft: false  # Published
+draft: true   # Hidden from build
+```
+
+Draft posts are excluded from the production build.
+</Accordion>
+
+<Accordion title="tags (optional)">
+**Type:** `string[]`
+
+Keywords for categorization and SEO:
+
+```md
+tags: ["web design", "tutorial", "SEO"]
+```
+</Accordion>
+
+<Accordion title="heroImage (optional)">
+**Type:** `string`
+
+Path to the featured image:
+
+```md
+heroImage: "/img/posts/web-profesional.webp"
+```
+
+Used in Open Graph tags and as the post header image.
+</Accordion>
+
+<Accordion title="publisher (optional)">
+**Type:** `string`
+
+Content publisher name:
+
+```md
+publisher: "Arte y Web Creaciones"
+```
+</Accordion>
+
+</AccordionGroup>
+
+### Example Blog Post
+
+Here's a real blog post from the project:
+
+```md src/content/blog/10-pasos-para-crear-tu-web-profesional.md
+---
+title: "10 Pasos Para Crear Tu Web Profesional"
+description: "✅ Guía completa: 10 pasos para crear tu web profesional desde CERO | Diseño, desarrollo y SEO | 📱 Presupuesto gratis en 24h"
+pubDate: '2025-09-13'
+heroImage: "/img/posts/web-profesional.webp"
+slug: "10-pasos-para-crear-tu-web-profesional"
+draft: false
+tags: ["webs profesional", "diseño web", "desarrollo web"]
+publisher: "Arte y Web Creaciones"
+---
+
+¿Quieres saber los 10 pasos para crear tu web pero no sabes por dónde empezar?
+
+## Guía paso a paso para Crear tu Página Web Profesional en 2026
+
+### 1. Elige un nombre de dominio estratégico
+
+El primer paso para crear una página web es elegir un nombre que refleje tu marca...
+
+### 2. Decide qué tipo de página web quieres
+
+Una vez que tengas un nombre, es hora de decidir qué tipo de página web...
+
+<!-- More content -->
+```
+
+### Querying Blog Posts
+
+In any Astro component or page, you can query the blog collection:
+
+```astro src/pages/blog/index.astro
+---
+import { getCollection } from 'astro:content';
+import Layout from '@/layouts/Layout.astro';
+
+// Get all blog posts
+const allPosts = await getCollection('blog');
+
+// Filter out drafts and sort by date
+const posts = allPosts
+  .filter(post => !post.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout title="Blog">
+  <h1>Blog Posts</h1>
+  <ul>
+    {posts.map(post => (
+      <li>
+        <a href={`/blog/${post.id}`}>
+          {post.data.title}
+        </a>
+        <time>{post.data.pubDate.toLocaleDateString('es-ES')}</time>
+      </li>
+    ))}
+  </ul>
+</Layout>
+```
+
+### Rendering Blog Posts
+
+The dynamic blog post page uses `getStaticPaths()` and `render()`:
+
+```astro src/pages/blog/[...slug].astro
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import Layout from "@/layouts/Layout.astro";
+import Alert from "@/components/Alert.astro";
+
+// Generate a route for each blog post
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post: CollectionEntry<"blog">) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
+}
+
+type Props = CollectionEntry<"blog">;
+const post = Astro.props;
+const { title, description, heroImage, tags } = post.data;
+
+// Render the MDX/Markdown content to a component
+const { Content } = await render(post);
+---
+
+<Layout title={title} description={description} image={heroImage} keywords={tags}>
+  <BlogPost {...post.data}>
+    <!-- Inject Alert component for use in MDX -->
+    <Content components={{ Alert }} />
+  </BlogPost>
+</Layout>
+```
+
+<Note>
+The `components` prop allows MDX files to use custom components like `<Alert>` directly in the Markdown.
+</Note>
+
+## Promotion Collections
+
+The three promotion collections (`promoSingle`, `promoPro`, `promoTienda`) share a common schema:
+
+### Promotion Schema
+
+```typescript src/content.config.ts
+const detallesSideBarSchema = z.array(
+  z.object({
+    icono: z.string(),      // Icon class (e.g., "bi bi-heart")
+    titulo: z.string(),     // Detail title
+    contenido: z.string(),  // Detail content
+  })
+);
+
+const promoSchema = z.object({
+  titulo: z.string(),                    // Main title
+  subtitulo: z.string(),                 // Subtitle
+  precio: z.string(),                    // Price (e.g., "190.00")
+  destacado: z.string(),                 // Highlighted text
+  backgroundImage: z.string(),           // Hero background image
+  detalles: z.array(z.string()),        // Feature list
+  link: z.string(),                      // CTA link
+  tituloMain: z.string(),               // Main section title
+  parrafosMain: z.array(z.string()),    // Main section paragraphs
+  imagenMain: z.string(),               // Main section image
+  detallesSideBar: detallesSideBarSchema, // Sidebar details
+});
+```
+
+### Example Promotion
+
+```md src/content/promoSingle/promoSingle.md
+---
+titulo: "Web SINGLEPAGE Completa"
+subtitulo: "Una web veloz en 7 días"
+precio: "190.00"
+destacado: "IVA no incluido"
+backgroundImage: "/img/ofertas/web-onepage-en-oferta.webp"
+detalles:
+  - "Una página responsive"
+  - "5 secciones en menú"
+  - "Rápida y sin recargas"
+  - "Hecha por profesionales"
+  - "Certificado SSL"
+  - "Optimizada para SEO"
+  - "Puede crecer en el tiempo"
+link: "/promocion/web-onepage-en-oferta/"
+tituloMain: "Detalles de la Web SinglePage"
+parrafosMain:
+  - "La Página Web Profesional One Page es una excelente opción para iniciar con una página web rápida."
+  - "Tiene todo lo que necesita una web para darse a conocer al público y crecer en el tiempo."
+  - "Está preparada para posicionarse orgánicamente en Google (SEO)."
+imagenMain: "/img/ofertas/promo-single-page.webp"
+detallesSideBar:
+  - icono: "bi bi-heart"
+    titulo: "La web es de tu propiedad"
+    contenido: "La creación de tu sitio web será completamente tuya."
+  - icono: "bi bi-lightning"
+    titulo: "Acceso inmediato"
+    contenido: "Una vez elijas plantilla: entrega 7 días"
+  - icono: "bi bi-menu-button-wide"
+    titulo: "Menú completo de 5 secciones"
+    contenido: "Menú con todo el contenido de forma instantánea."
+---
+```
+
+### Using Promotion Data
+
+Promotion collections are queried similarly to the blog:
+
+```astro src/components/Promociones/PromoCard.astro
+---
+import { getCollection } from 'astro:content';
+
+const promoSingle = await getCollection('promoSingle');
+const promoPro = await getCollection('promoPro');
+const promoTienda = await getCollection('promoTienda');
+
+const allPromos = [...promoSingle, ...promoPro, ...promoTienda];
+---
+
+<div class="promo-grid">
+  {allPromos.map(promo => (
+    <div class="promo-card">
+      <h3>{promo.data.titulo}</h3>
+      <p class="price">{promo.data.precio}€</p>
+      <ul>
+        {promo.data.detalles.map(detalle => (
+          <li>{detalle}</li>
+        ))}
+      </ul>
+      <a href={promo.data.link}>Más información</a>
+    </div>
+  ))}
+</div>
+```
+
+## Content Collections API
+
+The Content Collections API provides these key functions:
+
+### `defineCollection()`
+
+Define a collection with a loader and schema:
+
+```typescript
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+const myCollection = defineCollection({
+  loader: glob({ 
+    base: './src/content/myCollection',
+    pattern: '**/*.{md,mdx,json}' 
+  }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+  }),
+});
+```
+
+### `getCollection()`
+
+Retrieve all entries from a collection:
+
+```typescript
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+// posts: CollectionEntry<'blog'>[]
+```
+
+With filtering:
+
+```typescript
+const publishedPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+```
+
+### `getEntry()`
+
+Get a single entry by ID:
+
+```typescript
+import { getEntry } from 'astro:content';
+
+const post = await getEntry('blog', '10-pasos-para-crear-tu-web-profesional');
+// post: CollectionEntry<'blog'> | undefined
+```
+
+### `render()`
+
+Render Markdown/MDX content to a component:
+
+```typescript
+import { render } from 'astro:content';
+
+const post = await getEntry('blog', 'my-post');
+const { Content, headings } = await render(post);
+
+// Use in template:
+<Content />
+```
+
+## Type Safety Benefits
+
+<CardGroup cols={2}>
+
+<Card title="IntelliSense" icon="lightbulb">
+Get autocomplete for all frontmatter fields while writing content.
+</Card>
+
+<Card title="Build-Time Validation" icon="shield">
+Catch missing or incorrect fields before deployment.
+</Card>
+
+<Card title="Type-Safe Queries" icon="check">
+TypeScript knows the exact shape of your data when querying.
+</Card>
+
+<Card title="Refactoring Safety" icon="wrench">
+Rename fields with confidence - TypeScript will find all usages.
+</Card>
+
+</CardGroup>
+
+### Example Type Safety
+
+```astro
+---
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+
+// TypeScript knows the exact shape:
+posts[0].data.title      // ✅ string
+posts[0].data.pubDate    // ✅ Date
+posts[0].data.tags       // ✅ string[] | undefined
+posts[0].data.invalid    // ❌ TypeScript error!
+---
+```
+
+## Best Practices
+
+<Steps>
+
+<Step title="Always define schemas">
+Even for simple collections, schemas prevent errors and provide IntelliSense:
+
+```typescript
+// ❌ Bad - no validation
+defineCollection({
+  loader: glob({ base: './src/content/blog', pattern: '**/*.md' }),
+});
+
+// ✅ Good - full type safety
+defineCollection({
+  loader: glob({ base: './src/content/blog', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+  }),
+});
+```
+</Step>
+
+<Step title="Use z.coerce for dates">
+Dates in frontmatter are strings. Use `z.coerce.date()` for automatic conversion:
+
+```typescript
+pubDate: z.coerce.date()  // ✅ Converts "2026-03-05" to Date object
+pubDate: z.date()         // ❌ Will fail - frontmatter is string
+```
+</Step>
+
+<Step title="Mark optional fields">
+Use `.optional()` for fields that may not exist:
+
+```typescript
+schema: z.object({
+  title: z.string(),                    // Required
+  tags: z.array(z.string()).optional(), // Optional
+})
+```
+</Step>
+
+<Step title="Filter in queries">
+Filter drafts and sort in your query, not in the template:
+
+```typescript
+// ✅ Good - filter early
+const posts = (await getCollection('blog'))
+  .filter(p => !p.data.draft)
+  .sort((a, b) => b.data.pubDate - a.data.pubDate);
+
+// ❌ Bad - filter in template
+const posts = await getCollection('blog');
+// Then filter in template with {#if}
+```
+</Step>
+
+</Steps>
+
+## Adding a New Collection
+
+To add a new content collection:
+
+<Steps>
+
+<Step title="Create the directory">
+```bash
+mkdir src/content/testimonials
+```
+</Step>
+
+<Step title="Define the schema">
+```typescript src/content.config.ts
+const testimonials = defineCollection({
+  loader: glob({ 
+    base: './src/content/testimonials',
+    pattern: '**/*.{md,json}' 
+  }),
+  schema: z.object({
+    author: z.string(),
+    company: z.string(),
+    rating: z.number().min(1).max(5),
+    text: z.string(),
+    date: z.coerce.date(),
+  }),
+});
+
+export const collections = {
+  blog,
+  promoSingle,
+  promoPro,
+  promoTienda,
+  testimonials, // Add new collection
+};
+```
+</Step>
+
+<Step title="Add content files">
+```json src/content/testimonials/john-doe.json
+{
+  "author": "John Doe",
+  "company": "Example Corp",
+  "rating": 5,
+  "text": "Excellent service!",
+  "date": "2026-03-01"
+}
+```
+</Step>
+
+<Step title="Query in components">
+```astro
+---
+import { getCollection } from 'astro:content';
+
+const testimonials = await getCollection('testimonials');
+---
+
+{testimonials.map(t => (
+  <blockquote>
+    <p>{t.data.text}</p>
+    <cite>— {t.data.author}, {t.data.company}</cite>
+  </blockquote>
+))}
+```
+</Step>
+
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+
+<Card title="Component Architecture" icon="puzzle-piece" href="/concepts/component-architecture">
+Learn how components consume and display content
+</Card>
+
+<Card title="Astro Framework" icon="rocket" href="/concepts/astro-framework">
+Understand how Astro processes content collections
+</Card>
+
+</CardGroup>
+
+## Further Reading
+
+<Card title="Content Collections Guide" icon="book" href="https://docs.astro.build/en/guides/content-collections/">
+Official Astro documentation on Content Collections
+</Card>

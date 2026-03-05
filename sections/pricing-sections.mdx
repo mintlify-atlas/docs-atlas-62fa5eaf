@@ -1,0 +1,350 @@
+---
+title: Pricing Sections
+description: BuscaPrecios component for displaying pricing tiers and packages
+---
+
+# Pricing Sections (BuscaPrecios)
+
+The `BuscaPrecios` component displays pricing tiers in a responsive grid layout with detailed feature lists. It consumes data from `precios.json` and renders pricing cards for web pages and online stores.
+
+## Component Location
+
+**File**: `src/sections/BuscaPrecios.astro`
+
+## Data Source
+
+Pricing data is loaded from `src/data/precios.json`, which contains two pricing categories:
+
+- **ID 0**: Precios de páginas web (Web page pricing)
+- **ID 1**: Precios de tiendas online (Online store pricing)
+
+## Component Structure
+
+From `src/sections/BuscaPrecios.astro:1-70`:
+
+```astro
+---
+import servicios from "@/data/precios.json";
+import WebTienda from "@/sections/WebTienda.astro";
+
+const { idServicio } = Astro.props;
+
+// Filter the service corresponding to idServicio
+const servicio = servicios[idServicio];
+---
+
+{
+  !servicio ? (
+    <p>Servicio no encontrado.</p>
+  ) : (
+    <div class="seccionBlanco hero mb-4" style={`background-image: url(${servicio.background})`}>
+      <div class="overlay">
+        <div class="container">
+          <h2>{servicio.titulo}</h2>
+          <p>{servicio.subtitulo}</p>
+          <a href={servicio.botonlink} class="btn btn-light mt-3">{servicio.botontexto}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="seccionColor">
+      <div class="container">
+        <p class="section-subtitle">{servicio.subtitulo}</p>
+        <div class="columnas">
+          {servicio.cards.slice(0, 3).map((card, index) => (
+            <div class={`columna ${index === 1 ? 'columna-amarilla' : ''}`}>
+              <div class={`servicio ${index === 1 ? 'servicio-azul' : ''}`}>
+                <p class="card-title">{card.titulo}</p>
+                <p style="margin-top:-15px; color: #999">{card.subtitulo}</p>
+              </div>
+              <div style="display:flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="display:flex; align-items: center;">
+                  <p style="font-size:30px; margin-top:1rem;">{card.precio}</p>
+                  <div style="margin-left: 5px;">+ iva</div>
+                </div>
+              </div>
+              <ul>
+                {card.detalle1 && <><hr><li>{card.detalle1}</li></>}
+                {card.detalle2 && <><hr><li>{card.detalle2}</li></>}
+                {card.detalle3 && <><hr><li>{card.detalle3}</li></>}
+                <!-- ... continues for detalle4-17 -->
+              </ul>
+              <a href="/contacto/" class="btn btn-verde mb-4">Reservar ahora</a>
+            </div>
+          ))}
+        </div>
+      </div>
+      <WebTienda />
+    </div>
+  )
+}
+```
+
+## Usage
+
+### Display Web Page Pricing
+
+```astro
+---
+import BuscaPrecios from '@/sections/BuscaPrecios.astro';
+---
+
+<BuscaPrecios idServicio={0} />
+```
+
+### Display Online Store Pricing
+
+```astro
+---
+import BuscaPrecios from '@/sections/BuscaPrecios.astro';
+---
+
+<BuscaPrecios idServicio={1} />
+```
+
+## Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `idServicio` | `number` | Yes | Index of the pricing category (0 or 1) |
+
+## Pricing Card Structure
+
+Each pricing card displays:
+
+1. **Header section** (colored background)
+   - Title (`card.titulo`)
+   - Subtitle (`card.subtitulo`)
+
+2. **Price display**
+   - Large price number (`card.precio`)
+   - "+ iva" label
+
+3. **Feature list** (up to 17 details)
+   - `card.detalle1` through `card.detalle17`
+   - Each non-empty detail is displayed with an `<hr>` separator
+
+4. **CTA button**
+   - "Reservar ahora" button linking to `/contacto/`
+
+## Hero Section
+
+The component includes a hero section with:
+
+- Background image from `servicio.background`
+- Dark overlay (`rgba(0, 0, 0, 0.5)`)
+- Title and subtitle
+- CTA button to alternate pricing page
+
+### Hero Styles
+
+From `src/sections/BuscaPrecios.astro:100-130`:
+
+```css
+.hero {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: 0 0;
+  text-align: center;
+  color: white;
+}
+
+.hero .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+```
+
+## Pricing Grid Layout
+
+The pricing cards are displayed in a responsive 3-column grid:
+
+### Grid Styles
+
+From `src/sections/BuscaPrecios.astro:77-94`:
+
+```css
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.columna {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+```
+
+## Highlighted Card (Middle Column)
+
+The middle pricing card (index 1) receives special highlighting:
+
+### Highlighted Styles
+
+```css
+.servicio-azul {
+  background-color: #03A9F4;
+  color: white;
+}
+
+.columna-amarilla {
+  background-color: #FFF8DF;
+}
+```
+
+This creates a visual "recommended" or "popular" effect on the center package.
+
+## Data Requirements
+
+Each pricing service in `precios.json` must have:
+
+```json
+{
+  "id": "0",
+  "background": "/img/background.webp",
+  "titulo": "Section Title",
+  "subtitulo": "Section subtitle",
+  "botontexto": "Button Text",
+  "botonlink": "/alternate-page/",
+  "cards": [
+    {
+      "slug": "package-slug",
+      "titulo": "Package Name",
+      "subtitulo": "Package tagline",
+      "precio": "190",
+      "detalle1": "Feature 1",
+      "detalle2": "Feature 2",
+      "detalle3": "Feature 3"
+      // ... up to detalle17
+    }
+  ]
+}
+```
+
+## Feature List Rendering
+
+The component conditionally renders each detail field:
+
+```astro
+{card.detalle1 && <><hr><li>{card.detalle1}</li></>}
+{card.detalle2 && <><hr><li>{card.detalle2}</li></>}
+{card.detalle3 && <><hr><li>{card.detalle3}</li></>}
+```
+
+Empty or undefined details are automatically skipped, allowing flexible feature lists.
+
+## Buttons and CTAs
+
+### Hero Button
+
+```astro
+<a href={servicio.botonlink} class="btn btn-light mt-3">
+  {servicio.botontexto}
+</a>
+```
+
+- Links to alternate pricing page
+- Light button style with top margin
+
+### Card CTA Button
+
+```astro
+<a href="/contacto/" class="btn btn-verde mb-4">Reservar ahora</a>
+```
+
+- Links to contact page
+- Green button style with bottom margin
+- Spanish text: "Reservar ahora" (Reserve now)
+
+## WebTienda Component
+
+The section includes the `WebTienda` component at the bottom:
+
+```astro
+<WebTienda />
+```
+
+This likely displays additional e-commerce related information or CTAs.
+
+## Responsive Behavior
+
+While specific mobile styles aren't shown in the excerpt, the component uses:
+
+- CSS Grid for flexible layout
+- Percentage-based heights (`50vh` for hero)
+- Max-width containers (`1200px`)
+
+These ensure the section adapts to various screen sizes.
+
+## Styling Classes
+
+| Class | Purpose |
+|-------|--------|
+| `.seccionBlanco` | White background section |
+| `.seccionColor` | Colored background section |
+| `.hero` | Hero banner with background image |
+| `.overlay` | Dark overlay on hero |
+| `.columnas` | Grid container for pricing cards |
+| `.columna` | Individual pricing card |
+| `.columna-amarilla` | Yellow background for highlighted card |
+| `.servicio` | Card header section |
+| `.servicio-azul` | Blue background for highlighted header |
+| `.btn-verde` | Green CTA button |
+| `.btn-light` | Light-colored button |
+
+## Example: Adding to a Page
+
+```astro
+---
+import Layout from '@/layouts/Layout.astro';
+import BuscaPrecios from '@/sections/BuscaPrecios.astro';
+---
+
+<Layout 
+  title="Precios de Páginas Web | Arte y Web Creaciones"
+  description="Consulta nuestros precios para páginas web profesionales"
+>
+  <main>
+    <BuscaPrecios idServicio={0} />
+  </main>
+</Layout>
+```
+
+## Customization
+
+To customize the pricing section:
+
+1. **Edit data**: Modify `src/data/precios.json`
+2. **Change colors**: Update `.servicio-azul` and `.columna-amarilla` classes
+3. **Adjust grid**: Modify `grid-template-columns` in `.columnas`
+4. **Update button text**: Change "Reservar ahora" to your preferred CTA
+5. **Add mobile styles**: Add media queries for responsive breakpoints
+
+## Best Practices
+
+1. **Limit to 3 cards**: The design shows `slice(0, 3)` for optimal display
+2. **Use empty strings**: Set unused `detalleN` fields to `""` in JSON
+3. **Consistent pricing**: Use numeric strings without currency symbols in `precio` field
+4. **WebP images**: Use WebP format for background images
+5. **Descriptive features**: Make each `detalle` clear and concise
+6. **Highlight middle card**: The center card gets automatic highlighting

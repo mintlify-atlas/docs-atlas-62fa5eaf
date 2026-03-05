@@ -1,0 +1,425 @@
+---
+title: MDX Integration
+description: Configure and use MDX for interactive content with JSX components
+---
+
+## Overview
+
+MDX combines Markdown with JSX, allowing you to import and use components directly in content files. The project uses MDX for blog posts and promotional content.
+
+## Installation
+
+MDX is integrated via the official Astro integration:
+
+```bash
+npm install @astrojs/mdx
+```
+
+## Astro Integration
+
+Enable MDX in `astro.config.mjs`:
+
+```javascript
+import mdx from '@astrojs/mdx';
+
+export default defineConfig({
+  integrations: [
+    mdx(),
+    // ... other integrations
+  ],
+});
+```
+
+## Basic Usage
+
+### Create MDX File
+
+Create a `.mdx` file in your content directory:
+
+```mdx
+---
+title: "Interactive Blog Post"
+description: "Example MDX content"
+pubDate: 2026-03-05
+draft: false
+---
+
+import CallToAction from '@/components/CallToAction.astro';
+
+# Welcome to My Post
+
+This is regular Markdown content.
+
+<CallToAction 
+  title="Get Started" 
+  buttonText="Learn More" 
+  href="/getting-help" 
+/>
+
+More Markdown content here...
+```
+
+### File Extensions
+
+Both extensions are supported:
+- `.md` - Standard Markdown
+- `.mdx` - Markdown with JSX
+
+## Importing Components
+
+### Astro Components
+
+```mdx
+import Hero from '@/components/Hero.astro';
+import Feature from '@/components/Feature.astro';
+
+<Hero title="Amazing Feature" />
+
+## Features
+
+<Feature icon="check" text="Fast Performance" />
+<Feature icon="shield" text="Secure by Default" />
+```
+
+### React Components
+
+If using React:
+
+```mdx
+import Counter from '@/components/Counter.jsx';
+
+Try our interactive counter:
+
+<Counter client:load initialCount={0} />
+```
+
+### Component Props
+
+```mdx
+import Card from '@/components/Card.astro';
+
+<Card 
+  title="Card Title"
+  description="Card description"
+  image="/img/card.jpg"
+  link="/learn-more"
+/>
+```
+
+## Content Collections with MDX
+
+MDX files work seamlessly with Content Collections:
+
+```typescript
+// src/content.config.ts
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+const blog = defineCollection({
+  loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    draft: z.boolean(),
+  }),
+});
+
+export const collections = { blog };
+```
+
+## Custom Components
+
+### Creating Reusable Components
+
+```astro
+---
+// src/components/Note.astro
+interface Props {
+  type?: 'info' | 'warning' | 'success';
+}
+
+const { type = 'info' } = Astro.props;
+
+const styles = {
+  info: 'bg-blue-50 border-blue-200 text-blue-900',
+  warning: 'bg-yellow-50 border-yellow-200 text-yellow-900',
+  success: 'bg-green-50 border-green-200 text-green-900',
+};
+---
+
+<div class={`border-l-4 p-4 ${styles[type]}`}>
+  <slot />
+</div>
+```
+
+Use in MDX:
+
+```mdx
+import Note from '@/components/Note.astro';
+
+<Note type="warning">
+This is an important warning message.
+</Note>
+
+<Note type="success">
+Operation completed successfully!
+</Note>
+```
+
+## Markdown Features
+
+### Standard Markdown
+
+All standard Markdown works in MDX:
+
+```mdx
+# Heading 1
+## Heading 2
+### Heading 3
+
+**Bold text** and *italic text*
+
+- Unordered list
+- Another item
+
+1. Ordered list
+2. Second item
+
+[Link text](https://example.com)
+
+![Alt text](/image.jpg)
+
+`inline code`
+
+```javascript
+// Code block
+const x = 10;
+```
+```
+
+### Tables
+
+```mdx
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| Data 4   | Data 5   | Data 6   |
+```
+
+### Blockquotes
+
+```mdx
+> This is a blockquote.
+> It can span multiple lines.
+```
+
+## Advanced Features
+
+### JavaScript Expressions
+
+```mdx
+export const price = 199;
+export const discount = 0.2;
+export const finalPrice = price * (1 - discount);
+
+Original price: €{price}
+Discount: {discount * 100}%
+**Final price: €{finalPrice}**
+```
+
+### Conditional Rendering
+
+```mdx
+import Callout from '@/components/Callout.astro';
+
+export const showPromo = true;
+
+{showPromo && (
+  <Callout type="success">
+    Special promotion: 20% off!
+  </Callout>
+)}
+```
+
+### Mapping Data
+
+```mdx
+import Feature from '@/components/Feature.astro';
+
+export const features = [
+  { icon: 'check', text: 'Fast' },
+  { icon: 'shield', text: 'Secure' },
+  { icon: 'code', text: 'Modern' },
+];
+
+<div class="grid grid-cols-3 gap-4">
+  {features.map(feature => (
+    <Feature icon={feature.icon} text={feature.text} />
+  ))}
+</div>
+```
+
+## Layout for MDX
+
+Apply layouts to MDX content:
+
+```mdx
+---
+layout: '@/layouts/BlogPost.astro'
+title: "My Post"
+---
+
+Content here...
+```
+
+Or programmatically:
+
+```astro
+---
+// src/pages/blog/[...slug].astro
+import { getEntry } from 'astro:content';
+import BlogLayout from '@/layouts/BlogPost.astro';
+
+const entry = await getEntry('blog', Astro.params.slug);
+const { Content } = await entry.render();
+---
+
+<BlogLayout title={entry.data.title}>
+  <Content />
+</BlogLayout>
+```
+
+## Styling MDX Content
+
+### Global Prose Styles
+
+```astro
+---
+// Layout component
+---
+
+<article class="prose prose-lg max-w-none">
+  <slot />
+</article>
+
+<style is:global>
+  .prose h2 {
+    @apply text-3xl font-bold mt-8 mb-4;
+  }
+  
+  .prose p {
+    @apply text-gray-700 leading-relaxed mb-4;
+  }
+  
+  .prose a {
+    @apply text-primary hover:underline;
+  }
+</style>
+```
+
+### Component-Specific Styles
+
+```mdx
+import styled from '@/components/StyledDiv.astro';
+
+<div class="custom-content">
+  # Styled Heading
+  
+  Content with custom styles.
+</div>
+
+<style>
+  .custom-content {
+    background: linear-gradient(to right, #f0f0f0, #ffffff);
+    padding: 2rem;
+    border-radius: 0.5rem;
+  }
+</style>
+```
+
+## Code Syntax Highlighting
+
+Astro includes syntax highlighting by default:
+
+```mdx
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
+
+greet('World');
+```
+```
+
+### Supported Languages
+
+- JavaScript/TypeScript
+- HTML/CSS
+- Python
+- Bash/Shell
+- JSON/YAML
+- And many more...
+
+## Best Practices
+
+### Component Organization
+
+```
+src/
+├── components/
+│   ├── mdx/
+│   │   ├── Callout.astro
+│   │   ├── CodeBlock.astro
+│   │   └── VideoEmbed.astro
+│   └── ...
+└── content/
+    └── blog/
+        └── post.mdx
+```
+
+### Import Aliases
+
+Use `@/` alias for cleaner imports:
+
+```mdx
+import Component from '@/components/mdx/Component.astro';
+```
+
+### Performance
+
+- Keep components lightweight
+- Lazy load interactive components
+- Use `client:load` directive sparingly
+
+```mdx
+import HeavyComponent from '@/components/Heavy.jsx';
+
+<HeavyComponent client:visible />
+```
+
+## Troubleshooting
+
+### Components Not Rendering
+
+1. Check import path is correct
+2. Verify component file exists
+3. Ensure proper export from component
+
+### Syntax Errors
+
+1. Validate frontmatter YAML
+2. Check JSX syntax (proper closing tags)
+3. Verify all props match component interface
+
+### Styling Issues
+
+1. Check Tailwind classes are not purged
+2. Verify global styles are imported
+3. Use `is:global` for MDX content styles
+
+## Related Documentation
+
+- [Content Collections](/configuration/content-collections)
+- [Component Library](/components/overview)
+- [Blog Components](/content/blog-posts)

@@ -1,0 +1,217 @@
+---
+title: Content Collections
+description: Configure and use Astro Content Collections for type-safe content management
+---
+
+## Overview
+
+Content Collections provide type-safe, validated content management in Astro. The project uses collections for blog posts and promotional content.
+
+## Configuration
+
+Content collections are defined in `src/content.config.ts`:
+
+```typescript
+import { glob } from 'astro/loaders';
+import { defineCollection, z } from 'astro:content';
+
+// Blog collection schema
+const blog = defineCollection({
+  loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    draft: z.boolean(),
+    tags: z.array(z.string()).optional(),
+    heroImage: z.string().optional(),
+    publisher: z.string().optional(),
+  }),
+});
+
+// Promo schema for promotional pages
+const promoSchema = z.object({
+  titulo: z.string(),
+  subtitulo: z.string(),
+  precio: z.string(),
+  destacado: z.string(),
+  backgroundImage: z.string(),
+  detalles: z.array(z.string()),
+  link: z.string(),
+  tituloMain: z.string(),
+  parrafosMain: z.array(z.string()),
+  imagenMain: z.string(),
+  detallesSideBar: z.array(
+    z.object({
+      icono: z.string(),
+      titulo: z.string(),
+      contenido: z.string(),
+    })
+  ),
+});
+
+export const collections = {
+  blog,
+  promoSingle: defineCollection({
+    loader: glob({ base: './src/content/promoSingle', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+  promoPro: defineCollection({
+    loader: glob({ base: './src/content/promoPro', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+  promoTienda: defineCollection({
+    loader: glob({ base: './src/content/promoTienda', pattern: '**/*.{md,mdx,json}' }),
+    schema: promoSchema
+  }),
+};
+```
+
+## Collections
+
+### Blog Collection
+
+Location: `src/content/blog/`
+
+**Schema:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | Yes | Blog post title |
+| `description` | string | Yes | Meta description |
+| `pubDate` | date | Yes | Publication date |
+| `draft` | boolean | Yes | Draft status |
+| `tags` | string[] | No | Post tags |
+| `heroImage` | string | No | Hero image path |
+| `publisher` | string | No | Publisher name |
+
+**Example:**
+
+```markdown
+---
+title: "Cuánto Cuesta Crear Una Página Web"
+description: "Guía completa de precios para crear páginas web en 2026"
+pubDate: 2026-01-15
+draft: false
+tags: ["precios", "desarrollo web"]
+heroImage: "/img/blog/costes-web.webp"
+publisher: "Arte y Web Creaciones"
+---
+
+Your content here...
+```
+
+### Promotional Collections
+
+Three collections for different service tiers:
+
+- **promoSingle** - Single page websites
+- **promoPro** - Professional multi-page websites
+- **promoTienda** - E-commerce stores
+
+**Location:** `src/content/promoSingle/`, `src/content/promoPro/`, `src/content/promoTienda/`
+
+## Using Collections
+
+### Query All Entries
+
+```typescript
+import { getCollection } from 'astro:content';
+
+// Get all blog posts
+const posts = await getCollection('blog');
+
+// Filter published posts
+const publishedPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Sort by date
+const sortedPosts = posts.sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+```
+
+### Query Single Entry
+
+```typescript
+import { getEntry } from 'astro:content';
+
+const post = await getEntry('blog', 'cuanto-cuesta-una-pagina-web');
+```
+
+### Render Content
+
+```astro
+---
+import { getEntry } from 'astro:content';
+
+const post = await getEntry('blog', Astro.params.slug);
+const { Content } = await post.render();
+---
+
+<article>
+  <h1>{post.data.title}</h1>
+  <Content />
+</article>
+```
+
+## Type Safety
+
+Content Collections provide full TypeScript support:
+
+```typescript
+import type { CollectionEntry } from 'astro:content';
+
+type BlogPost = CollectionEntry<'blog'>;
+
+function formatPost(post: BlogPost) {
+  return {
+    title: post.data.title,
+    date: post.data.pubDate.toLocaleDateString('es-ES'),
+  };
+}
+```
+
+## Validation
+
+Zod schemas automatically validate frontmatter:
+
+```markdown
+---
+title: "My Post"
+# Error: description is required
+draft: false
+pubDate: 2026-01-15
+---
+```
+
+<Warning>
+Build will fail if any content doesn't match the schema. This ensures data integrity.
+</Warning>
+
+## Adding New Collections
+
+1. Create directory: `src/content/your-collection/`
+2. Define schema in `src/content.config.ts`
+3. Export in collections object
+
+```typescript
+const myCollection = defineCollection({
+  loader: glob({ base: './src/content/my-collection', pattern: '**/*.md' }),
+  schema: z.object({
+    title: z.string(),
+    // ... other fields
+  }),
+});
+
+export const collections = {
+  // ... existing collections
+  myCollection,
+};
+```
+
+## Related Documentation
+
+- [MDX Integration](/configuration/mdx)
+- [Blog Setup](/content/blog-posts)

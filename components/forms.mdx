@@ -1,0 +1,460 @@
+---
+title: 'Form Components'
+description: 'Contact forms with CRM integration and spam protection'
+icon: 'envelope'
+---
+
+## Overview
+
+Arte y Web provides two form components for different use cases: **FormMautic** for advanced CRM integration with robust spam protection, and **FormSimple** for basic contact forms powered by Netlify.
+
+## FormMautic
+
+Advanced form component that integrates with Mautic CRM and includes comprehensive client-side spam protection.
+
+### Props
+
+<ParamField path="formId" type="number" required>
+  The Mautic form ID to load. This corresponds to a form created in your Mautic instance.
+</ParamField>
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="CRM Integration" icon="database">
+    Direct integration with Mautic marketing automation platform for lead capture and nurturing.
+  </Card>
+  <Card title="Spam Protection" icon="shield">
+    Multi-layer spam detection including honeypot, timing checks, gibberish detection, and field validation.
+  </Card>
+  <Card title="Phone Validation" icon="phone">
+    Real-time phone number validation with pattern matching and letter blocking.
+  </Card>
+  <Card title="Redirect Override" icon="arrow-right">
+    Automatic redirect to local thank-you page instead of external URLs.
+  </Card>
+</CardGroup>
+
+### Usage
+
+<CodeGroup>
+```astro Basic Usage
+---
+import FormMautic from '@/components/FormMautic.astro';
+---
+
+<FormMautic formId={5} />
+```
+
+```astro In Landing Page
+---
+import FormMautic from '@/components/FormMautic.astro';
+import HeroOfertas from '@/components/Promociones/HeroOfertas.astro';
+---
+
+<HeroOfertas idPromo="web-onepage" />
+
+<section class="contact-section">
+  <h2>Request Your Free Quote</h2>
+  <FormMautic formId={5} />
+</section>
+```
+
+```astro Multiple Forms
+---
+import FormMautic from '@/components/FormMautic.astro';
+
+const formIds = {
+  contact: 5,
+  quote: 7,
+  newsletter: 9
+};
+---
+
+<FormMautic formId={formIds.contact} />
+```
+</CodeGroup>
+
+### Spam Protection Features
+
+The FormMautic component implements multiple layers of spam protection:
+
+<AccordionGroup>
+  <Accordion title="1. Submission Timing (3-second minimum)">
+    Blocks submissions that occur too quickly after page load (< 3 seconds), a common bot behavior.
+    
+    ```javascript
+    const timeDiff = Date.now() - loadTime;
+    if (timeDiff < 3000) {
+      // Block submission
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="2. Honeypot Field">
+    Hidden field that should remain empty. Bots typically fill all fields, triggering detection.
+    
+    ```javascript
+    const honeypot = form.querySelector('input[id$="_fax"]');
+    if (honeypot && honeypot.value) {
+      // Spam detected
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="3. Gibberish Detection">
+    Analyzes text input for patterns common in bot submissions:
+    
+    - Consonant clusters (5+ consonants in a row)
+    - Low vowel ratio (< 15% for words > 5 letters)
+    - Suspicious mixed case patterns
+    - No spaces in long strings
+    
+    ```javascript
+    const isGibberish = (str) => {
+      // Check consonant clusters
+      if (/[^aeiouáéíóú0-9\s\W]{5,}/gi.test(str)) return true;
+      
+      // Check vowel ratio
+      if (vowelCount / letterCount < 0.15) return true;
+      
+      // Additional checks...
+    };
+    ```
+  </Accordion>
+  
+  <Accordion title="4. Phone Validation">
+    Enforces strict phone number validation:
+    
+    - No letters allowed
+    - Minimum 6 digits required
+    - Only allows: numbers, spaces, +, (, ), -
+    - Real-time input filtering
+    - HTML5 pattern attribute for native validation
+    
+    ```javascript
+    phoneField.setAttribute('pattern', '[0-9\\s\\+\\(\\)]+');
+    phoneField.setAttribute('inputmode', 'tel');
+    
+    // Real-time validation
+    phoneField.addEventListener('input', (e) => {
+      e.target.value = val.replace(/[^0-9\s\+\(\)\-]/g, '');
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="5. Field Content Validation">
+    Validates that at least one field is filled and checks for valid email/phone formats.
+  </Accordion>
+</AccordionGroup>
+
+### Configuration
+
+#### Mautic Server URL
+
+The component loads scripts from the Mautic server. Update the URL in the component if using a different instance:
+
+```astro
+<script
+  is:inline
+  src={`https://mautic.buzonamigo.com/form/generate.js?id=${formId}`}
+></script>
+```
+
+#### Redirect URL
+
+The component automatically overrides Mautic's redirect to use a local thank-you page:
+
+```javascript
+// Location: src/components/FormMautic.astro:136
+returnField.value = window.location.origin + "/recibido-ok";
+```
+
+<Note>
+  Ensure you have a `/recibido-ok` page created for successful form submissions.
+</Note>
+
+### Form Field Detection
+
+The component robustly detects form fields using multiple strategies:
+
+<CodeGroup>
+```javascript Name Field Detection
+const nameField = findInput([
+  'nombre',
+  'f_nombre',
+  'firstname',
+  'first_name',
+  'name',
+  'nombre_completo'
+]);
+```
+
+```javascript Phone Field Detection
+const phoneField = findInput([
+  'mobile',
+  'movil',
+  'telefono',
+  'phone',
+  'celular',
+  'tel'
+]);
+```
+
+```javascript Email Field Detection
+const emailField = findInput([
+  'email',
+  'correo',
+  'e-mail'
+]);
+```
+</CodeGroup>
+
+### Error Handling
+
+The component displays user-friendly error messages:
+
+```javascript
+const showError = (message) => {
+  const messageContainer = document.querySelector('.mauticform-message');
+  if (messageContainer) {
+    messageContainer.innerHTML = message;
+    messageContainer.style.color = 'red';
+    messageContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+```
+
+Common error messages:
+- "El nombre no parece válido. Por favor, revísalo."
+- "El teléfono NO puede contener letras."
+- "El teléfono debe contener al menos 6 dígitos."
+- "Por favor, rellena al menos un campo de contacto."
+
+## FormSimple
+
+A lightweight contact form powered by Netlify Forms. Perfect for simple contact pages without CRM requirements.
+
+### Props
+
+No props required - the component is self-contained.
+
+### Features
+
+<CardGroup cols={2}>
+  <Card title="Netlify Integration" icon="cloud">
+    Automatic form handling via Netlify's built-in form detection.
+  </Card>
+  <Card title="Honeypot Protection" icon="shield-check">
+    Basic spam protection with honeypot field.
+  </Card>
+  <Card title="Responsive Design" icon="mobile">
+    Mobile-optimized with Tailwind CSS styling.
+  </Card>
+  <Card title="Required Validation" icon="check">
+    HTML5 required attributes for client-side validation.
+  </Card>
+</CardGroup>
+
+### Usage
+
+<CodeGroup>
+```astro Basic Usage
+---
+import FormSimple from '@/components/FormSimple.astro';
+---
+
+<section class="py-12">
+  <div class="container mx-auto">
+    <h2 class="text-3xl font-bold text-center mb-8">Contáctanos</h2>
+    <FormSimple />
+  </div>
+</section>
+```
+
+```astro In Two-Column Layout
+---
+import FormSimple from '@/components/FormSimple.astro';
+---
+
+<div class="grid md:grid-cols-2 gap-8">
+  <div>
+    <h2>Get in Touch</h2>
+    <p>We'd love to hear from you...</p>
+  </div>
+  <div>
+    <FormSimple />
+  </div>
+</div>
+```
+</CodeGroup>
+
+### Form Fields
+
+The component includes three fields:
+
+<ParamField path="name" type="text" required>
+  Contact name - required field with text input
+</ParamField>
+
+<ParamField path="email" type="email" required>
+  Email address - required field with email validation
+</ParamField>
+
+<ParamField path="message" type="textarea" required>
+  Message content - required multiline text area (5 rows)
+</ParamField>
+
+<ParamField path="bot-field" type="text" hidden>
+  Honeypot field hidden from users for spam protection
+</ParamField>
+
+### Netlify Configuration
+
+The form includes required Netlify attributes:
+
+```astro
+<form
+  name="contact"
+  method="POST"
+  action="/recibido-ok"
+  data-netlify="true"
+  netlify-honeypot="bot-field"
+>
+  <input type="hidden" name="form-name" value="contact" />
+  <!-- form fields -->
+</form>
+```
+
+<Info>
+  When deploying to Netlify, the form is automatically detected and submissions are available in the Netlify dashboard under Forms.
+</Info>
+
+### Styling
+
+The form uses Tailwind CSS utility classes:
+
+```astro
+<!-- Container -->
+<form class="w-full p-6 space-y-6">
+  
+  <!-- Input fields -->
+  <input
+    class="w-full border border-gray-300 rounded-xl p-3 
+           focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  
+  <!-- Submit button -->
+  <button
+    class="w-full bg-blue-600 text-white font-semibold py-3 px-6 
+           rounded-xl hover:bg-blue-700 transition"
+  >
+    Enviar mensaje
+  </button>
+</form>
+```
+
+## Comparison
+
+<CardGroup cols={2}>
+  <Card title="Use FormMautic When..." icon="chart-line">
+    - You need CRM integration
+    - Lead tracking is important
+    - You want advanced spam protection
+    - Marketing automation is required
+    - You need detailed form analytics
+  </Card>
+  <Card title="Use FormSimple When..." icon="paper-plane">
+    - Simple contact form is sufficient
+    - Deploying to Netlify
+    - No CRM integration needed
+    - Minimal setup preferred
+    - Basic spam protection is enough
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Steps>
+  <Step title="Create Thank You Page">
+    Create a `/recibido-ok` page to display after form submission:
+    
+    ```astro
+    ---
+    // src/pages/recibido-ok.astro
+    import Layout from '@/layouts/Layout.astro';
+    ---
+    
+    <Layout title="Mensaje Recibido">
+      <section class="text-center py-20">
+        <h1>¡Gracias por contactarnos!</h1>
+        <p>Responderemos en 24 horas.</p>
+      </section>
+    </Layout>
+    ```
+  </Step>
+  
+  <Step title="Test Spam Protection">
+    For FormMautic, test the spam protection:
+    - Submit too quickly (< 3 seconds)
+    - Enter gibberish in name field
+    - Enter letters in phone field
+    - Leave all fields empty
+  </Step>
+  
+  <Step title="Configure Mautic Forms">
+    In Mautic dashboard:
+    - Create form with matching field names
+    - Set up email notifications
+    - Configure post-submit actions
+    - Test form in Mautic first
+  </Step>
+  
+  <Step title="Monitor Submissions">
+    - Check Netlify Forms dashboard (for FormSimple)
+    - Review Mautic contacts (for FormMautic)
+    - Set up email notifications
+    - Monitor for spam submissions
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="FormMautic not loading">
+    Check:
+    - Mautic server URL is accessible
+    - Form ID exists in Mautic
+    - JavaScript console for errors
+    - Network tab for failed script loads
+    
+    Component reference: `src/components/FormMautic.astro:10-14`
+  </Accordion>
+  
+  <Accordion title="Spam protection too strict">
+    Adjust thresholds in the spam protection code:
+    
+    ```javascript
+    // Increase time threshold
+    if (timeDiff < 2000) { // Changed from 3000
+    
+    // Relax phone validation
+    if (digitCount < 5) { // Changed from 6
+    ```
+    
+    Component reference: `src/components/FormMautic.astro:169-233`
+  </Accordion>
+  
+  <Accordion title="Netlify form not receiving submissions">
+    Ensure:
+    - `data-netlify="true"` attribute is present
+    - Hidden `form-name` input matches form name
+    - Form is in the deployed HTML (not added via JS)
+    - Honeypot field name matches `netlify-honeypot` attribute
+  </Accordion>
+</AccordionGroup>
+
+## Source Code References
+
+- FormMautic: `src/components/FormMautic.astro:1-296`
+- FormSimple: `src/components/FormSimple.astro:1-73`

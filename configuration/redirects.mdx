@@ -1,0 +1,472 @@
+---
+title: URL Redirects
+description: Configure URL redirects in Astro and Netlify for SEO and site migrations
+---
+
+## Overview
+
+The project uses two redirect systems: Astro's built-in redirects for simple cases and Netlify's redirect rules for complex patterns and domain normalization.
+
+## Astro Redirects
+
+### Configuration
+
+Simple redirects in `astro.config.mjs`:
+
+```javascript
+export default defineConfig({
+  redirects: {
+    '/compras/comprar-web-single': '/compras/comprar-web-onepage',
+    '/comprar-web-single': '/compras/comprar-web-onepage',
+    '/blog/cuanto-cuesta-crear-una-pagina-web': '/blog/cuanto-cuesta-una-pagina-web',
+    '/blog/cuanto-cuesta-crear-una-pagina-web/': '/blog/cuanto-cuesta-una-pagina-web/',
+  },
+});
+```
+
+### Characteristics
+
+- **Status Code:** 301 (permanent redirect)
+- **Build Time:** Generated at build
+- **Client Side:** Uses meta refresh fallback
+- **Server Side:** Depends on adapter
+
+### Use Cases
+
+```javascript
+redirects: {
+  // Old URL pattern to new pattern
+  '/old-page': '/new-page',
+  
+  // Product rename
+  '/comprar-web-single': '/compras/comprar-web-onepage',
+  
+  // URL normalization
+  '/blog/old-slug': '/blog/new-slug',
+  '/blog/old-slug/': '/blog/new-slug/', // With trailing slash
+}
+```
+
+## Netlify Redirects
+
+### Configuration
+
+Advanced redirects in `netlify.toml`:
+
+```toml
+[[redirects]]
+  from = "https://www.arteywebcreaciones.com/*"
+  to = "https://arteywebcreaciones.com/:splat"
+  status = 301
+  force = true
+```
+
+### WWW Normalization
+
+Force canonical domain:
+
+```toml
+[[redirects]]
+  from = "https://www.arteywebcreaciones.com/*"
+  to = "https://arteywebcreaciones.com/:splat"
+  status = 301
+  force = true
+```
+
+**Key features:**
+- `force = true` - Override other rules
+- `:splat` - Preserve path after domain
+- Status 301 - Permanent redirect
+
+<Note>
+This ensures all traffic uses the non-www version for consistent SEO.
+</Note>
+
+### Content Migration
+
+Move content to blog section:
+
+```toml
+[[redirects]]
+  from = "/que-es-el-dropshipping"
+  to = "/blog/que-es-el-dropshipping"
+  status = 301
+
+[[redirects]]
+  from = "/cuantos-tipos-de-web-existen"
+  to = "/blog/cuantos-tipos-de-web-existen"
+  status = 301
+
+[[redirects]]
+  from = "/creaciones-web-benidorm"
+  to = "/blog/creaciones-web-benidorm"
+  status = 301
+```
+
+### Wildcard Redirects
+
+#### Path Preservation
+
+```toml
+[[redirects]]
+  from = "/promocion/*"
+  to = "/promociones/:splat"
+  status = 301
+```
+
+**Example:**
+- `/promocion/web-onepage` → `/promociones/web-onepage`
+- `/promocion/black-friday` → `/promociones/black-friday`
+
+#### Path Consolidation
+
+```toml
+[[redirects]]
+  from = "/how-much-does-a-website-cost/*"
+  to = "/blog/cuanto-cuesta-una-pagina-web"
+  status = 301
+```
+
+**Example:**
+- `/how-much-does-a-website-cost/` → `/blog/cuanto-cuesta-una-pagina-web`
+- `/how-much-does-a-website-cost/spain` → `/blog/cuanto-cuesta-una-pagina-web`
+
+### Section Reorganization
+
+```toml
+[[redirects]]
+  from = "/pagina-web/*"
+  to = "/servicios/creacion-de-paginas-web"
+  status = 301
+
+[[redirects]]
+  from = "/quiero-tienda-online/*"
+  to = "/servicios/creacion-de-tiendas-online"
+  status = 301
+
+[[redirects]]
+  from = "/mantenimiento-web/*"
+  to = "/servicios/mantenimiento-web"
+  status = 301
+```
+
+### Legacy URL Cleanup
+
+```toml
+[[redirects]]
+  from = "/opiniones/*"
+  to = "/nosotros"
+  status = 301
+
+[[redirects]]
+  from = "/opiniones"
+  to = "/nosotros"
+  status = 301
+
+[[redirects]]
+  from = "/proyectos/*"
+  to = "/"
+  status = 301
+```
+
+### Blog Post Consolidation
+
+```toml
+[[redirects]]
+  from = "/blog/cuanto-cuesta-crear-un-sitio-web"
+  to = "/blog/cuanto-cuesta-una-pagina-web"
+  status = 301
+
+[[redirects]]
+  from = "/blog/cuanto-cuesta-una-pagina-web-completa"
+  to = "/blog/cuanto-cuesta-una-pagina-web"
+  status = 301
+
+[[redirects]]
+  from = "/cuanto-cuesta-crear-una-pagina-web"
+  to = "/blog/cuanto-cuesta-una-pagina-web"
+  status = 301
+```
+
+### 404 Handling
+
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+```
+
+<Warning>
+This rule must be last. It catches all unmatched URLs.
+</Warning>
+
+## Redirect Patterns
+
+### Splat Operator
+
+Capture remaining path:
+
+```toml
+# :splat preserves the rest of the URL
+from = "/old-section/*"
+to = "/new-section/:splat"
+
+# Example:
+# /old-section/page → /new-section/page
+# /old-section/sub/page → /new-section/sub/page
+```
+
+### Placeholders
+
+Capture specific segments:
+
+```toml
+[[redirects]]
+  from = "/blog/:year/:month/:slug"
+  to = "/blog/:slug"
+  status = 301
+
+# Example:
+# /blog/2026/03/my-post → /blog/my-post
+```
+
+### Query Parameters
+
+Preserve query strings:
+
+```toml
+[[redirects]]
+  from = "/old-page"
+  to = "/new-page"
+  status = 301
+  force = false
+  query = {param = ":param"}
+
+# Example:
+# /old-page?param=value → /new-page?param=value
+```
+
+## Status Codes
+
+### 301 - Permanent Redirect
+
+```toml
+[[redirects]]
+  from = "/old-url"
+  to = "/new-url"
+  status = 301
+```
+
+**Use for:**
+- Content moved permanently
+- URL structure changes
+- Domain migrations
+- SEO consolidation
+
+### 302 - Temporary Redirect
+
+```toml
+[[redirects]]
+  from = "/maintenance"
+  to = "/temporary-page"
+  status = 302
+```
+
+**Use for:**
+- A/B testing
+- Temporary maintenance
+- Seasonal promotions
+
+### 404 - Not Found
+
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+```
+
+**Use for:**
+- Catch-all for missing pages
+- Custom 404 page
+
+## Testing Redirects
+
+### Local Testing
+
+Test with Netlify CLI:
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Build site
+npm run build
+
+# Test locally with redirects
+netlify dev
+```
+
+### cURL Testing
+
+Test redirect status:
+
+```bash
+# Test redirect
+curl -I https://arteywebcreaciones.com/old-url
+
+# Expected output:
+HTTP/2 301
+location: https://arteywebcreaciones.com/new-url
+```
+
+### Browser Testing
+
+```bash
+# Open browser DevTools
+# Network tab
+# Check Status Code column
+# Look for 301 or 302
+```
+
+## Best Practices
+
+### Redirect Order
+
+```toml
+# 1. Most specific rules first
+[[redirects]]
+  from = "/blog/specific-post"
+  to = "/new-location/specific-post"
+  status = 301
+
+# 2. Pattern rules next
+[[redirects]]
+  from = "/blog/*"
+  to = "/articles/:splat"
+  status = 301
+
+# 3. Catch-all last
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+```
+
+### Avoid Redirect Chains
+
+```toml
+# ❌ Bad: Chain of redirects
+/a → /b
+/b → /c
+/c → /d
+
+# ✅ Good: Direct redirect
+/a → /d
+/b → /d
+/c → /d
+```
+
+### Trailing Slashes
+
+Be consistent:
+
+```toml
+# Handle both versions
+[[redirects]]
+  from = "/old-page"
+  to = "/new-page"
+  status = 301
+
+[[redirects]]
+  from = "/old-page/"
+  to = "/new-page/"
+  status = 301
+```
+
+### Case Sensitivity
+
+```toml
+# Netlify redirects are case-sensitive
+# Handle different cases:
+
+[[redirects]]
+  from = "/Old-Page"
+  to = "/new-page"
+  status = 301
+
+[[redirects]]
+  from = "/old-page"
+  to = "/new-page"
+  status = 301
+```
+
+## Common Patterns
+
+### HTTP to HTTPS
+
+```toml
+[[redirects]]
+  from = "http://arteywebcreaciones.com/*"
+  to = "https://arteywebcreaciones.com/:splat"
+  status = 301
+  force = true
+```
+
+### Apex to WWW (or vice versa)
+
+```toml
+# Non-WWW to WWW
+[[redirects]]
+  from = "https://arteywebcreaciones.com/*"
+  to = "https://www.arteywebcreaciones.com/:splat"
+  status = 301
+  force = true
+```
+
+### Language Redirects
+
+```toml
+[[redirects]]
+  from = "/en/*"
+  to = "/es/:splat"
+  status = 302
+```
+
+## Monitoring Redirects
+
+### Netlify Analytics
+
+View redirect performance:
+1. Netlify Dashboard
+2. Analytics
+3. Top redirect sources
+
+### Google Search Console
+
+Monitor SEO impact:
+1. Coverage report
+2. Check for redirect errors
+3. Monitor indexed URLs
+
+### Custom Logging
+
+Log redirects in analytics:
+
+```javascript
+// Track redirects in Google Analytics
+if (document.referrer.includes('old-url')) {
+  gtag('event', 'redirect', {
+    from: document.referrer,
+    to: window.location.href
+  });
+}
+```
+
+## Related Documentation
+
+- [SEO Setup](/configuration/seo-setup)
+- [Deployment](/configuration/deployment)
+- [Astro Configuration](/configuration/astro-config)
+- [Sitemap Generation](/configuration/sitemap)

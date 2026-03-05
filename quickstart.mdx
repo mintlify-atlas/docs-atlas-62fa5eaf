@@ -1,80 +1,221 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start Guide
+description: Get your local development environment up and running in minutes
 ---
 
-## Get started in three steps
+This guide will walk you through setting up the Arte y Web Creaciones project for local development. You'll go from zero to a running development server in just a few steps.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before you begin, ensure you have the following installed:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+- **Node.js 20.x** - The project requires Node.js version 20
+- **npm** - Comes bundled with Node.js
+- **Git** - For cloning the repository
 
-### Step 2: Deploy your changes
+<Note>
+The project uses Node.js 20.x as specified in the `.nvmrc` file. If you use nvm, simply run `nvm use` in the project directory.
+</Note>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Installation Steps
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Steps>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Step title="Clone the repository">
+First, clone the project repository to your local machine:
 
-### Step 3: Go live
+```bash
+git clone <repository-url>
+cd astro-prueba
+```
+</Step>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+<Step title="Install dependencies">
+Install all required npm packages:
 
-## Next steps
+```bash
+npm install
+```
 
-Now that you have your docs running, explore these key features:
+This will install all dependencies including:
+- **Astro 5.12.1** - The core framework
+- **Tailwind CSS** - For styling
+- **MDX support** - For content authoring
+- **Astro Icon** - Icon system
+- **Free Astro Components** - Component library
+
+</Step>
+
+<Step title="Start the development server">
+Launch the local development server:
+
+```bash
+npm run dev
+```
+
+The server will start on **port 4322** (as configured in `astro.config.mjs`):
+
+```
+http://localhost:4322
+```
+
+<Warning>
+Note that this project uses a custom port (4322) instead of Astro's default port (4321).
+</Warning>
+</Step>
+
+<Step title="Verify the installation">
+Open your browser and navigate to `http://localhost:4322`. You should see the Arte y Web Creaciones homepage with:
+
+- Hero section with pricing information
+- Trust badges
+- Service offerings (One Page, Professional, E-commerce)
+- Google reviews
+- Portfolio section
+
+If you see the homepage, congratulations! Your development environment is ready.
+</Step>
+
+</Steps>
+
+## Available Commands
+
+Once installed, you can use these npm scripts from the project root:
+
+<CodeGroup>
+
+```bash Development
+npm run dev
+# Starts local dev server at localhost:4322
+```
+
+```bash Build
+npm run build
+# Build your production site to ./dist/
+```
+
+```bash Preview
+npm run preview
+# Preview your build locally, before deploying
+```
+
+```bash Astro CLI
+npm run astro
+# Run Astro CLI commands
+```
+
+</CodeGroup>
+
+## Project Structure Overview
+
+After installation, you'll find this folder structure:
+
+```text
+/
+├── public/              # Static assets (images, fonts, etc.)
+│   ├── img/            # Images and graphics
+│   └── favicon.png     # Site favicon
+├── src/
+│   ├── components/     # Reusable Astro components (98 total)
+│   ├── content/        # Content collections (blog, promos)
+│   ├── layouts/        # Page layouts (Layout.astro, BlogPost.astro)
+│   ├── pages/          # File-based routing pages
+│   ├── sections/       # Large page sections
+│   ├── styles/         # Global CSS files
+│   └── content.config.ts  # Content collections schema
+├── astro.config.mjs    # Astro configuration
+├── tailwind.config.mjs # Tailwind CSS configuration
+└── package.json        # Project dependencies
+```
+
+## Next Steps
+
+Now that your development environment is running:
 
 <CardGroup cols={2}>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card title="Learn About Astro" icon="rocket" href="/concepts/astro-framework">
+Understand how Astro powers this project
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
+<Card title="Content Collections" icon="book" href="/concepts/content-collections">
+Explore how content is structured and managed
 </Card>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
+<Card title="Component Architecture" icon="puzzle-piece" href="/concepts/component-architecture">
+Discover the component patterns used throughout
 </Card>
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
+<Card title="Get Help" icon="life-ring" href="/getting-help">
+Find support resources and community help
 </Card>
 
 </CardGroup>
 
+## Common Issues
+
+<AccordionGroup>
+
+<Accordion title="Port 4322 is already in use">
+If you see an error that port 4322 is already in use, you can either:
+
+1. Stop the process using that port
+2. Change the port in `astro.config.mjs`:
+
+```js astro.config.mjs
+export default defineConfig({
+  server: {
+    port: 4323, // Change to any available port
+  },
+  // ... rest of config
+});
+```
+</Accordion>
+
+<Accordion title="Node version mismatch">
+If you encounter errors about Node.js version, ensure you're using Node.js 20.x:
+
+```bash
+node --version
+# Should show v20.x.x
+```
+
+If using nvm:
+
+```bash
+nvm install 20
+nvm use 20
+```
+</Accordion>
+
+<Accordion title="Sharp installation errors">
+The project uses Sharp for image optimization. If you encounter installation errors:
+
+```bash
+npm rebuild sharp
+```
+
+Or reinstall dependencies:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+</Accordion>
+
+</AccordionGroup>
+
+## Development Tips
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+**Hot Module Replacement (HMR)**: Astro automatically reloads your browser when you make changes to your code. You'll see updates instantly without manual refreshes.
 </Note>
+
+- **Path Aliases**: The project uses `@/*` as an alias for `src/*`, so you can import with `@/components/Alert.astro` instead of relative paths
+- **TypeScript**: Full TypeScript support is enabled with strict mode
+- **Tailwind CSS**: All Tailwind utilities are available out of the box
+- **MDX**: You can use JSX components in Markdown files
+
+## Ready to Code?
+
+You're all set! Start exploring the codebase and making changes. The development server will automatically refresh as you work.
